@@ -29,6 +29,7 @@ public class GunSmithTableItem extends BlockItem implements BlockItemDataAccesso
         super(block, (new Item.Properties()).stacksTo(1));
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public BlockEntityWithoutLevelRenderer getCustomRenderer() {
         Minecraft minecraft = Minecraft.getInstance();

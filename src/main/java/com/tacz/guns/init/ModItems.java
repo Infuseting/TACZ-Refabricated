@@ -17,12 +17,12 @@ public class ModItems {
 
     public static ModernKineticGunItem MODERN_KINETIC_GUN = register("modern_kinetic_gun", new ModernKineticGunItem());
 
-//    public static RegistryObject<ThrowableItem> M67 = register("m67", new ThrowableItem());
+//    public static ThrowableItem M67 = register("m67", new ThrowableItem());
 
     public static Item AMMO = register("ammo", new AmmoItem());
     public static AttachmentItem ATTACHMENT = register("attachment", new AttachmentItem());
 
-    public static GunSmithTableItem GUN_SMITH_TABLE = register("gun_smith_table",  new DefaultTableItem(ModBlocks.GUN_SMITH_TABLE));
+    public static GunSmithTableItem GUN_SMITH_TABLE = register("gun_smith_table", new DefaultTableItem(ModBlocks.GUN_SMITH_TABLE));
     public static GunSmithTableItem WORKBENCH_111 = register("workbench_a", new GunSmithTableItem(ModBlocks.WORKBENCH_111));
     public static GunSmithTableItem WORKBENCH_211 = register("workbench_b", new GunSmithTableItem(ModBlocks.WORKBENCH_211));
     public static GunSmithTableItem WORKBENCH_121 = register("workbench_c", new GunSmithTableItem(ModBlocks.WORKBENCH_121));

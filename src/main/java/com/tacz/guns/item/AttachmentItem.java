@@ -65,6 +65,7 @@ public class AttachmentItem extends Item implements AttachmentItemDataAccessor, 
         return stacks;
     }
 
+    @Environment(EnvType.CLIENT)
     @Override
     public BlockEntityWithoutLevelRenderer getCustomRenderer() {
         Minecraft minecraft = Minecraft.getInstance();

@@ -3,7 +3,6 @@ package com.tacz.guns.util;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.tacz.guns.GunMod;
-import me.shedaniel.cloth.clothconfig.shadowed.org.yaml.snakeyaml.util.UriEncoder;
 import net.fabricmc.loader.api.FabricLoader;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.comparator.LastModifiedFileComparator;
