@@ -15,7 +15,7 @@ import net.fabricmc.loader.api.VersionParsingException;
 import net.fabricmc.loader.api.metadata.version.VersionPredicate;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
@@ -87,33 +87,25 @@ public enum GunPackLoader implements RepositorySource {
         GunMod.LOGGER.info(MARKER, "Start scanning for gun packs in {}", resourcePacksPath);
         List<GunPack> gunPacks = scanExtensions(resourcePacksPath);
         GunMod.LOGGER.info(MARKER, "Found {} possible gunpack(s) and added them to resource set.", gunPacks.size());
-        List<PathPackResources> extensionPacks = new ArrayList<>();
+        List<PackResources> extensionPacks = new ArrayList<>();
 
         for (GunPack gunPack : gunPacks) {
-
-            // FIXME 无法加载zip枪包
-            PathPackResources packResources = new PathPackResources(gunPack.name, false, gunPack.path) {
-
-                @Override
-                @NotNull
-                protected Path resolve(String... paths) {
-                    if (paths.length < 1) {
-                        throw new IllegalArgumentException("Missing path");
-                    } else {
-                        return gunPack.path.resolve(String.join("/", paths));
+            PackResources packResources;
+            if (Files.isDirectory(gunPack.path)) {
+                packResources = new PathPackResources(gunPack.name, false, gunPack.path) {
+                    @Override
+                    @NotNull
+                    protected Path resolve(String... paths) {
+                        if (paths.length < 1) {
+                            throw new IllegalArgumentException("Missing path");
+                        } else {
+                            return gunPack.path.resolve(String.join("/", paths));
+                        }
                     }
-                }
-
-                @Override
-                public IoSupplier<InputStream> getResource(PackType type, ResourceLocation location) {
-                    return super.getResource(type, location);
-                }
-
-                @Override
-                public void listResources(PackType type, String namespace, String path, PackResources.ResourceOutput resourceOutput) {
-                    super.listResources(type, namespace, path, resourceOutput);
-                }
-            };
+                };
+            } else {
+                packResources = new FilePackResources(gunPack.name, gunPack.path.toFile(), false);
+            }
             extensionPacks.add(packResources);
         }
 
