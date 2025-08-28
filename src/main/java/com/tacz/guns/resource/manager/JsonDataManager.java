@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -43,7 +44,7 @@ public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<Resou
         this.gson = pGson;
         this.dataClass = dataClass;
         this.marker = MarkerFactory.getMarker(marker);
-        this.ID = new ResourceLocation(GunMod.MOD_ID, getMarker().getName().toLowerCase());
+        this.ID = new ResourceLocation(GunMod.MOD_ID, marker.toLowerCase(Locale.ROOT));
         this.fileToIdConverter = fileToIdConverter;
     }
 
