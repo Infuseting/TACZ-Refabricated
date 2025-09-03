@@ -24,6 +24,7 @@
     "common.ReloadableResourcesMixin",
     "common.ServerLevelMixin",
     "common.ServerPacksSourceMixin",
+    "common.ShapedRecipeMixin",
     "common.itemhandler.AbstractHorseMixin",
     "common.itemhandler.LivingEntityMixin",
     "common.itemhandler.PlayerMixin",
