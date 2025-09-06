@@ -45,7 +45,6 @@
     "client.GameRendererMixin",
     "client.GuiMixin",
     "client.ItemInHandRendererMixin",
-    "client.ItemRendererMixin",
     "client.KeyboardHandlerMixin",
     "client.MinecraftMixin",
     "client.MouseHandlerMixin",
