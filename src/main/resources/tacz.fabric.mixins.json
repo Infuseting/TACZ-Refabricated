@@ -15,6 +15,7 @@
     "common.ClipContextMixin",
     "common.EntityMixin",
     "common.ExplosionMixin",
+    "common.IngredientMixin",
     "common.ItemStackMixin",
     "common.LivingEntityMixin",
     "common.PackRepositoryMixin",
