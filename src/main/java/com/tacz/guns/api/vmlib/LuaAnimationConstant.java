@@ -13,6 +13,7 @@ import java.util.Map;
 /**
  * 此类用于在 Lua 脚本中引入 ContextConstant 定义的常量，如播放类型等。
  * 调用 install 方法直接将常量注入环境
+ *
  * @see AnimationConstant
  */
 public class LuaAnimationConstant implements LuaLibrary {
@@ -43,7 +44,7 @@ public class LuaAnimationConstant implements LuaLibrary {
 
     @Override
     public void install(LuaValue chunk) {
-        for(Map.Entry<String, Object> entry : constantMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : constantMap.entrySet()) {
             chunk.set(entry.getKey(), CoerceJavaToLua.coerce(entry.getValue()));
         }
     }

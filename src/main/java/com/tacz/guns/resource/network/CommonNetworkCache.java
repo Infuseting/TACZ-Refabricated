@@ -143,7 +143,8 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
                 case BLOCK_INDEX:
                     delayed.put(entry.getKey(), entry.getValue());
                     break;
-                default: fromNetwork(entry.getKey(), entry.getValue());
+                default:
+                    fromNetwork(entry.getKey(), entry.getValue());
             }
         }
         for (Map.Entry<DataType, Map<ResourceLocation, String>> entry : delayed.entrySet()) {
@@ -182,8 +183,9 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
 
     private void resolveAttachmentTags(Map<ResourceLocation, String> data) {
         for (Map.Entry<ResourceLocation, String> entry : data.entrySet()) {
-            List<String> tags = CommonAssetsManager.GSON.fromJson(entry.getValue(), new TypeToken<>(){});
-            if (entry.getKey().getPath().startsWith("allow_attachments/") && entry.getKey().getPath().length()>18) {
+            List<String> tags = CommonAssetsManager.GSON.fromJson(entry.getValue(), new TypeToken<>() {
+            });
+            if (entry.getKey().getPath().startsWith("allow_attachments/") && entry.getKey().getPath().length() > 18) {
                 ResourceLocation gunId = entry.getKey().withPath(entry.getKey().getPath().substring(18));
                 allowAttachmentTags.computeIfAbsent(gunId, (v) -> new HashSet<>()).addAll(tags);
             } else {
@@ -201,7 +203,8 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
                     case GUN_INDEX -> gunIndex.put(entry.getKey(), parse(entry.getValue(), CommonGunIndex.class));
                     case AMMO_INDEX -> ammoIndex.put(entry.getKey(), parse(entry.getValue(), CommonAmmoIndex.class));
                     case ATTACHMENT_DATA -> attachmentData.put(entry.getKey(), parseAttachmentData(entry.getValue()));
-                    case ATTACHMENT_INDEX -> attachmentIndex.put(entry.getKey(), parse(entry.getValue(), CommonAttachmentIndex.class));
+                    case ATTACHMENT_INDEX ->
+                            attachmentIndex.put(entry.getKey(), parse(entry.getValue(), CommonAttachmentIndex.class));
                     case ATTACHMENT_TAGS -> resolveAttachmentTags(data);
                     case BLOCK_INDEX -> blockIndex.put(entry.getKey(), parse(entry.getValue(), CommonBlockIndex.class));
                     case RECIPE_FILTER -> recipeFilter.put(entry.getKey(), parse(entry.getValue(), RecipeFilter.class));

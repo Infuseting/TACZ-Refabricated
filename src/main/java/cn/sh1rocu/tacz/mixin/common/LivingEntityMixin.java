@@ -21,9 +21,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(LivingEntity.class)
 public abstract class LivingEntityMixin {
-    @Shadow public abstract ItemStack getItemInHand(InteractionHand hand);
+    @Shadow
+    public abstract ItemStack getItemInHand(InteractionHand hand);
 
-    @ModifyReturnValue(method = "createLivingAttributes",at = @At("RETURN"))
+    @ModifyReturnValue(method = "createLivingAttributes", at = @At("RETURN"))
     private static AttributeSupplier.Builder tacz$createLivingAttributes(AttributeSupplier.Builder original) {
         original.add(ModAttributes.BULLET_RESISTANCE);
         return original;

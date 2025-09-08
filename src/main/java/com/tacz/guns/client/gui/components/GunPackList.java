@@ -126,9 +126,9 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
         int i2 = this.getMaxScroll();
         if (i2 > 0) {
-            int j2 = (int)((float)((this.y1 - this.y0) * (this.y1 - this.y0)) / (float)this.getMaxPosition());
+            int j2 = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
             j2 = Mth.clamp(j2, 32, this.y1 - this.y0 - 8);
-            int k1 = (int)this.getScrollAmount() * (this.y1 - this.y0 - j2) / i2 + this.y0;
+            int k1 = (int) this.getScrollAmount() * (this.y1 - this.y0 - j2) / i2 + this.y0;
             if (k1 < this.y0) {
                 k1 = this.y0;
             }
@@ -157,7 +157,7 @@ public class GunPackList extends ContainerObjectSelectionList<GunPackList.Entry>
 
         @Override
         public List<? extends NarratableEntry> narratables() {
-             return ImmutableList.of(widget);
+            return ImmutableList.of(widget);
         }
 
         @Override

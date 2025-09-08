@@ -12,7 +12,7 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nonnull;
 import java.util.EnumMap;
 
-public class GunNbtFactory extends TimelessItemNbtFactory<AbstractGunItem, GunNbtFactory>{
+public class GunNbtFactory extends TimelessItemNbtFactory<AbstractGunItem, GunNbtFactory> {
     //可以在任何时候引用而无需担心加载时机
     //但是无法自动匹配正确的物品类型（由于目前缺少添加新物品的附属模组，故可以认为暂时不需要）
     private int ammoCount = 0;

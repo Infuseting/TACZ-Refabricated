@@ -22,9 +22,10 @@ public class ResourceScanner {
      * 扫描指定目录下的所有json文件<br>
      * 与原版的scanDirectory方法的区别在于，查询结果是作为返回值返回的，而且允许注释
      * 对于相同的文件路径，只读取优先级最高的文件
+     *
      * @param pResourceManager 资源管理器
-     * @param pName 目录名
-     * @param pGson Gson实例
+     * @param pName            目录名
+     * @param pGson            Gson实例
      * @return 扫描到的json文件
      */
     public static Map<ResourceLocation, JsonElement> scanDirectory(ResourceManager pResourceManager, String pName, Gson pGson) {
@@ -33,7 +34,7 @@ public class ResourceScanner {
 
     public static Map<ResourceLocation, JsonElement> scanDirectory(ResourceManager pResourceManager, FileToIdConverter filetoidconverter, Gson pGson) {
         Map<ResourceLocation, JsonElement> output = Maps.newHashMap();
-        for(Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
+        for (Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(pResourceManager).entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
             ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 
@@ -53,14 +54,15 @@ public class ResourceScanner {
     /**
      * 扫描指定目录下的所有json文件<br/>
      * 与{@link #scanDirectory(ResourceManager, String, Gson)}不同的是，该方法会读取所有json文件作为列表返回
-     * @param pResourceManager 资源管理器
+     *
+     * @param pResourceManager  资源管理器
      * @param filetoidconverter 文件路径和id的映射
-     * @param pGson Gson实例
+     * @param pGson             Gson实例
      * @return 扫描到的json文件
      */
     public static Map<ResourceLocation, List<JsonElement>> scanDirectoryAll(ResourceManager pResourceManager, FileToIdConverter filetoidconverter, Gson pGson) {
         Map<ResourceLocation, List<JsonElement>> output = Maps.newHashMap();
-        for(Map.Entry<ResourceLocation, List<Resource>> entry : filetoidconverter.listMatchingResourceStacks(pResourceManager).entrySet()) {
+        for (Map.Entry<ResourceLocation, List<Resource>> entry : filetoidconverter.listMatchingResourceStacks(pResourceManager).entrySet()) {
             ResourceLocation resourcelocation = entry.getKey();
             ResourceLocation resourcelocation1 = filetoidconverter.fileToId(resourcelocation);
 

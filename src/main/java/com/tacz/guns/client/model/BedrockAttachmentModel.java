@@ -285,7 +285,7 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
                     RenderSystem.stencilFunc(GL11.GL_EQUAL, i + 1, 0xFF);
                     renderTempPart(matrixStack, transformType, renderType, light, overlay, ocularNodePaths.get(i));
                     // 渲染划分
-                    int b = ~(i+1) & 0xFF;
+                    int b = ~(i + 1) & 0xFF;
                     RenderSystem.stencilFunc(GL11.GL_EQUAL, b, 0xFF);
                     renderTempPart(matrixStack, transformType, renderType, light, overlay, divisionNodePaths.get(i));
                 }
@@ -368,11 +368,11 @@ public class BedrockAttachmentModel extends BedrockAnimatedModel {
         super.render(matrixStack, transformType, renderType, light, overlay);
     }
 
-    private static class OcularWrapper{
+    private static class OcularWrapper {
         public ModelRendererWrapper renderer;
         public boolean isScope;
 
-        public OcularWrapper (ModelRendererWrapper renderer, boolean isScope){
+        public OcularWrapper(ModelRendererWrapper renderer, boolean isScope) {
             this.renderer = renderer;
             this.isScope = isScope;
         }

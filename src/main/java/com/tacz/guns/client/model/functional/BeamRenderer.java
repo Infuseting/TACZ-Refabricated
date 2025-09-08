@@ -28,7 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nonnull;
 import java.util.List;
 
-public class BeamRenderer  {
+public class BeamRenderer {
     public static final ResourceLocation LASER_BEAM_TEXTURE = new ResourceLocation(GunMod.MOD_ID, "textures/entity/beam.png");
     private static final LaserConfig DEFAULT_LASER_CONFIG = new LaserConfig();
 
@@ -82,7 +82,7 @@ public class BeamRenderer  {
         float halfWidth = width / 2;
         int endAlpha = fadeOut ? 0 : 255;
         int light = LightTexture.pack(15, 15);
-    	pConsumer.vertex(pPose.pose(), -halfWidth, -halfWidth, 0).color(r, g, b, 255).uv(0, 0).uv2(light).endVertex();
+        pConsumer.vertex(pPose.pose(), -halfWidth, -halfWidth, 0).color(r, g, b, 255).uv(0, 0).uv2(light).endVertex();
         pConsumer.vertex(pPose.pose(), -halfWidth, halfWidth, 0).color(r, g, b, 255).uv(0, 1).uv2(light).endVertex();
         pConsumer.vertex(pPose.pose(), -halfWidth, halfWidth, z).color(r, g, b, endAlpha).uv(1, 1).uv2(light).endVertex();
         pConsumer.vertex(pPose.pose(), -halfWidth, -halfWidth, z).color(r, g, b, endAlpha).uv(1, 0).uv2(light).endVertex();
@@ -104,20 +104,20 @@ public class BeamRenderer  {
     }
 
     public static class LaserBeamRenderState extends RenderStateShard {
-    	
-        public LaserBeamRenderState(String pName, Runnable pSetupState, Runnable pClearState) {
-			super(pName, pSetupState, pClearState);
-		}
 
-        protected static final RenderStateShard.TransparencyStateShard  LIGHTNING_ADDITIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
+        public LaserBeamRenderState(String pName, Runnable pSetupState, Runnable pClearState) {
+            super(pName, pSetupState, pClearState);
+        }
+
+        protected static final RenderStateShard.TransparencyStateShard LIGHTNING_ADDITIVE_TRANSPARENCY = new RenderStateShard.TransparencyStateShard(
                 "lightning_transparency", () -> {
-                    RenderSystem.enableBlend();
-                    RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
-                            GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
-                }, () -> {
-                    RenderSystem.disableBlend();
-                    RenderSystem.defaultBlendFunc();
-                });
+            RenderSystem.enableBlend();
+            RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE,
+                    GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+        }, () -> {
+            RenderSystem.disableBlend();
+            RenderSystem.defaultBlendFunc();
+        });
 
         protected static final RenderType LASER_BEAM = RenderType.create("laser_beam", DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP,
                 VertexFormat.Mode.QUADS, 256, true, true,
@@ -131,9 +131,9 @@ public class BeamRenderer  {
                         .setCullState(NO_CULL)
                         .setTextureState(new RenderStateShard.TextureStateShard(LASER_BEAM_TEXTURE, false, false))
                         .createCompositeState(false));
-    	
+
         public static RenderType getLaserBeam() {
             return LASER_BEAM;
         }
-	}
+    }
 }

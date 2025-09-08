@@ -19,6 +19,7 @@ public class LivingEntitySpeedModifier {
     private static final UUID WEIGHT_SPEED_MODIFIER_UUID = UUID.fromString("2CB6F5AD-C6D2-9D29-4E84-0856ACD47CDB");
     private final LivingEntity shooter;
     private final ShooterDataHolder dataHolder;
+
     public LivingEntitySpeedModifier(LivingEntity shooter, ShooterDataHolder dataHolder) {
         this.shooter = shooter;
         this.dataHolder = dataHolder;
@@ -36,7 +37,7 @@ public class LivingEntitySpeedModifier {
             AttachmentCacheProperty cacheProperty = IGunOperator.fromLivingEntity(shooter).getCacheProperty();
             if (cacheProperty != null) {
                 double weightFactor = SyncConfig.WEIGHT_SPEED_MULTIPLIER.get();
-                if(weightFactor > 0){
+                if (weightFactor > 0) {
                     float targetSpeed = cacheProperty.getCache(WeightModifier.ID);
                     targetSpeed *= (float) -weightFactor;
                     AttributeModifier currentModifier = speedModifier.getModifier(WEIGHT_SPEED_MODIFIER_UUID);

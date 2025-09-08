@@ -132,14 +132,14 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             int currentAmmoCount = iGun.getCurrentAmmoCount(this.gun) + barrelBulletAmount;
 
             if (!iGun.useDummyAmmo(gun)) {
-                if (display != null && display.getAmmoCountStyle()== AmmoCountStyle.PERCENT) {
+                if (display != null && display.getAmmoCountStyle() == AmmoCountStyle.PERCENT) {
                     this.ammoCountText = Component.literal(CURRENT_AMMO_FORMAT_PERCENT.format((float) currentAmmoCount / (maxAmmoCount == 0 ? 1f : maxAmmoCount)));
                 } else {
                     this.ammoCountText = Component.literal("%d/%d".formatted(currentAmmoCount, maxAmmoCount));
                 }
             } else {
                 int dummyAmmoAmount = iGun.getDummyAmmoAmount(gun);
-                if (display != null && display.getAmmoCountStyle()== AmmoCountStyle.PERCENT) {
+                if (display != null && display.getAmmoCountStyle() == AmmoCountStyle.PERCENT) {
                     String p = CURRENT_AMMO_FORMAT_PERCENT.format((float) currentAmmoCount / (maxAmmoCount == 0 ? 1f : maxAmmoCount));
                     this.ammoCountText = Component.literal("%s (%d)".formatted(p, dummyAmmoAmount));
                 } else {
@@ -175,7 +175,7 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             int bulletAmount = gunData.getBulletData().getBulletAmount();
             MutableComponent value;
             if (display != null && display.getDamageStyle() == DamageStyle.PER_PROJECTILE && bulletAmount > 1) {
-                value = Component.literal(DAMAGE_FORMAT.format(damage/bulletAmount) + "x" + bulletAmount).withStyle(ChatFormatting.AQUA);
+                value = Component.literal(DAMAGE_FORMAT.format(damage / bulletAmount) + "x" + bulletAmount).withStyle(ChatFormatting.AQUA);
             } else {
                 value = Component.literal(DAMAGE_FORMAT.format(damage)).withStyle(ChatFormatting.AQUA);
             }

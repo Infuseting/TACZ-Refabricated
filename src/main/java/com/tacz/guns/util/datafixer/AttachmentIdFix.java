@@ -7,15 +7,16 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 
-import static com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor.*;
 import static com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor.ATTACHMENT_ID_TAG;
+import static com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor.getAttachmentIdFromTag;
 
 public final class AttachmentIdFix {
     private AttachmentIdFix() {
     }
 
     public static final Map<ResourceLocation, ResourceLocation> OLD_TO_NEW;
-    static  {
+
+    static {
         OLD_TO_NEW = ImmutableMap.<ResourceLocation, ResourceLocation>builder()
                 .put(new ResourceLocation("tacz", "muzzle_silence_knight_qd"), new ResourceLocation("tacz", "muzzle_silencer_knight_qd"))
                 .put(new ResourceLocation("tacz", "muzzle_silence_mirage"), new ResourceLocation("tacz", "muzzle_silencer_mirage"))

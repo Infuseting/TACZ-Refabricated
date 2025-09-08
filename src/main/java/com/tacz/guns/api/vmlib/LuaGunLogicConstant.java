@@ -8,7 +8,7 @@ import org.luaj.vm2.lib.jse.CoerceJavaToLua;
 
 import java.util.Map;
 
-public class LuaGunLogicConstant implements LuaLibrary{
+public class LuaGunLogicConstant implements LuaLibrary {
     private final Map<String, Object> constantMap = Maps.newHashMap();
 
     public LuaGunLogicConstant() {
@@ -24,7 +24,7 @@ public class LuaGunLogicConstant implements LuaLibrary{
 
     @Override
     public void install(LuaValue chunk) {
-        for(Map.Entry<String, Object> entry : constantMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : constantMap.entrySet()) {
             chunk.set(entry.getKey(), CoerceJavaToLua.coerce(entry.getValue()));
         }
     }

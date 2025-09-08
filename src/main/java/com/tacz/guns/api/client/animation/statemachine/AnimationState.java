@@ -27,7 +27,7 @@ public interface AnimationState<T extends AnimationStateContext> {
     /**
      * 每当状态机接受输入时，调用此方法。
      *
-     * @param context 状态上下文，承载状态行为可能需要的各种参数
+     * @param context   状态上下文，承载状态行为可能需要的各种参数
      * @param condition 状态机接受的输入
      * @return 返回转移后的状态，或者返回 Null 表示无需状态转移。
      * @see AnimationStateMachine#trigger(String)

@@ -32,7 +32,8 @@ public interface ICommonResourceProvider {
 
     @Nullable CommonBlockIndex getBlockIndex(ResourceLocation blockId);
 
-    @Nullable public LuaTable getScript(ResourceLocation scriptId);
+    @Nullable
+    public LuaTable getScript(ResourceLocation scriptId);
 
     Set<Map.Entry<ResourceLocation, CommonGunIndex>> getAllGuns();
 

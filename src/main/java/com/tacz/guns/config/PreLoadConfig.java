@@ -3,7 +3,6 @@ package com.tacz.guns.config;
 import com.electronwill.nightconfig.core.file.CommentedFileConfig;
 import com.tacz.guns.GunMod;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ConfigTracker;
 import net.minecraftforge.fml.config.ModConfig;
@@ -11,8 +10,8 @@ import net.minecraftforge.fml.config.ModConfig;
 import java.nio.file.Path;
 
 public class PreLoadConfig {
-    public static void init(){
-        ForgeConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.COMMON, spec,"tacz-pre.toml");
+    public static void init() {
+        ForgeConfigRegistry.INSTANCE.register(GunMod.MOD_ID, ModConfig.Type.COMMON, spec, "tacz-pre.toml");
 
     }
 

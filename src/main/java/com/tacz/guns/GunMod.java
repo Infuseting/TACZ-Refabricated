@@ -2,18 +2,12 @@ package com.tacz.guns;
 
 import com.tacz.guns.api.resource.ResourceManager;
 import com.tacz.guns.compat.kubejs.TimelessKubeJSPlugin;
-import com.tacz.guns.config.ClientConfig;
-import com.tacz.guns.config.CommonConfig;
-import com.tacz.guns.config.PreLoadConfig;
-import com.tacz.guns.config.ServerConfig;
 import com.tacz.guns.init.*;
 import com.tacz.guns.resource.GunPackLoader;
 import com.tacz.guns.resource.modifier.AttachmentPropertyManager;
-import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.packs.PackType;
-import net.minecraftforge.fml.config.ModConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

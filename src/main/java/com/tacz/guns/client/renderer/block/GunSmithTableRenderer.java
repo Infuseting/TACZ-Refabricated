@@ -27,7 +27,7 @@ public class GunSmithTableRenderer implements BlockEntityRenderer<GunSmithTableB
 
     public Optional<ClientBlockIndex> getIndex(GunSmithTableBlockEntity blockEntity) {
         ResourceLocation id = blockEntity.getId();
-        if (id==null || id.equals(DefaultAssets.EMPTY_BLOCK_ID)) {
+        if (id == null || id.equals(DefaultAssets.EMPTY_BLOCK_ID)) {
             return Optional.empty();
         }
         return TimelessAPI.getClientBlockIndex(id);

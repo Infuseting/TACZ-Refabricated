@@ -8,7 +8,6 @@ import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -60,7 +59,7 @@ public class ServerMessageSound implements FabricPacket {
 
     @Environment(EnvType.CLIENT)
     public void handle(LocalPlayer player, PacketSender responseSender) {
-         SoundPlayManager.playMessageSound(this);
+        SoundPlayManager.playMessageSound(this);
     }
 
     public int getEntityId() {

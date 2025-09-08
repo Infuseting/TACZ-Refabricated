@@ -20,7 +20,7 @@ public class GunSmithTableResult {
 
     public GunSmithTableResult(ItemStack result, @Nullable ResourceLocation group) {
         this.result = result;
-        this.group = group==null ? TabConfig.TAB_EMPTY : group;
+        this.group = group == null ? TabConfig.TAB_EMPTY : group;
     }
 
 
@@ -30,7 +30,7 @@ public class GunSmithTableResult {
 
     public GunSmithTableResult(@NotNull RawGunTableResult raw, @Nullable ResourceLocation group) {
         this.raw = raw;
-        this.group = group==null ? TabConfig.TAB_EMPTY : group;
+        this.group = group == null ? TabConfig.TAB_EMPTY : group;
     }
 
     public void init() {

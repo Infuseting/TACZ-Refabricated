@@ -7,6 +7,7 @@ import com.tacz.guns.resource.pojo.data.attachment.Modifier;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+
 /**
  * 参数化的属性缓存。将每个乘区的结果保存在缓存中，以便快速计算。
  * 适用于一些初始值无法确定直接确定的属性，如后坐力

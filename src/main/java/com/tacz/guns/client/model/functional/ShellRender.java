@@ -79,7 +79,7 @@ public class ShellRender implements IFunctionalRenderer {
             }
 
             // 渲染抛壳
-            gunModel.delegateRender((poseStack1, vertexConsumer1, transformType1, light, overlay) ->{
+            gunModel.delegateRender((poseStack1, vertexConsumer1, transformType1, light, overlay) -> {
                 SHELL_QUEUE.forEach(data -> renderSingleShell(transformType1, light, overlay, data, initialVelocity, acceleration, angularVelocity, model, location));
             });
         });

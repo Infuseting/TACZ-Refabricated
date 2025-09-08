@@ -31,7 +31,7 @@ public class ExtraMovementModifier implements IAttachmentModifier<MoveSpeed, Mov
     public JsonProperty<MoveSpeed> readJson(String json) {
         Data data = CommonAssetsManager.GSON.fromJson(json, Data.class);
         MoveSpeed moveSpeed = data.getMoveSpeed();
-        return  new ExtraSpeedJsonProperty(moveSpeed);
+        return new ExtraSpeedJsonProperty(moveSpeed);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ExtraMovementModifier implements IAttachmentModifier<MoveSpeed, Mov
         @Override
         public void initComponents() {
             MoveSpeed speed = getValue();
-            if(speed == null)return;
+            if (speed == null) return;
             resolveComponent(speed.getBaseMultiplier(), "movement_speed");
             resolveComponent(speed.getAimMultiplier(), "aim_speed");
             resolveComponent(speed.getReloadMultiplier(), "reload_speed");

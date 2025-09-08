@@ -47,7 +47,7 @@ public class LuaGunAnimationConstant implements LuaLibrary {
 
     @Override
     public void install(LuaValue chunk) {
-        for(Map.Entry<String, Object> entry : constantMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : constantMap.entrySet()) {
             chunk.set(entry.getKey(), CoerceJavaToLua.coerce(entry.getValue()));
         }
     }

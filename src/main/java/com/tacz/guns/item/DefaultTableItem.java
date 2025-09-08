@@ -7,8 +7,9 @@ import net.minecraft.world.level.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class DefaultTableItem extends GunSmithTableItem{
+public class DefaultTableItem extends GunSmithTableItem {
     public static final ResourceLocation ID = new ResourceLocation(GunMod.MOD_ID, "gun_smith_table");
+
     public DefaultTableItem(Block block) {
         super(block);
     }
