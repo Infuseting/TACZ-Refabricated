@@ -29,7 +29,7 @@ public abstract class AbstractHorseMixin extends Animal {
     }
 
     @Inject(method = "createInventory", at = @At("TAIL"))
-    private void createInventory(CallbackInfo ci) {
+    private void tacz$createInventory(CallbackInfo ci) {
         this.itemHandler = LazyOptional.of(() -> new InvWrapper(this.inventory));
     }
 

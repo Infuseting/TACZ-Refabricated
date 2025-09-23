@@ -25,7 +25,7 @@ public abstract class LivingEntityMixin implements ItemHandlerCapability {
     private LazyOptional<?>[] handlers;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void initClass(EntityType<? extends LivingEntity> entityType, Level world, CallbackInfo ci) {
+    private void tacz$initClass(EntityType<? extends LivingEntity> entityType, Level world, CallbackInfo ci) {
         handlers = EntityEquipmentInvWrapper.create(self());
     }
 
