@@ -199,6 +199,11 @@ dependencies {
 
     modRuntimeOnly "maven.modrinth:tweakeroo:0.17.1"
     modRuntimeOnly "maven.modrinth:malilib:0.16.3"
+
+    // REI
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version"
 }
 
 processResources {
@@ -239,11 +244,14 @@ jar {
 publishing {
     publications {
         create("mavenJava", MavenPublication) {
-            artifactId = project.archives_base_name
+            artifactId = "${project.archives_base_name}-${project.minecraft_version}"
             from components.java
         }
     }
 
     repositories {
+        maven {
+            url "file:///D:/github_maven/Sh1roCu_MCRepo/repository"
+        }
     }
 }
