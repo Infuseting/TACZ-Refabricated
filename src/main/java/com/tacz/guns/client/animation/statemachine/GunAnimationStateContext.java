@@ -181,7 +181,7 @@ public class GunAnimationStateContext extends ItemAnimationStateContext {
         }
         return processCameraEntity(entity -> {
                     if (entity instanceof LivingEntity livingEntity) {
-                        livingEntity.tacz$getItemHandler(null)
+                        return livingEntity.tacz$getItemHandler(null)
                                 .map(cap -> {
                                     // 背包检查
                                     for (int i = 0; i < cap.getSlots(); i++) {
