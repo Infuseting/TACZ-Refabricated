@@ -9,6 +9,7 @@ import com.tacz.guns.client.model.BedrockAmmoModel;
 import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.client.resource.pojo.TransformScale;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -22,12 +23,18 @@ import org.joml.Vector3f;
 
 import javax.annotation.Nonnull;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static net.minecraft.world.item.ItemDisplayContext.GUI;
 
 
 public class AmmoItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static final SlotModel SLOT_AMMO_MODEL = new SlotModel();
+
+    public static final Supplier<AmmoItemRenderer> INSTANCE = () -> {
+        Minecraft client = Minecraft.getInstance();
+        return new AmmoItemRenderer(client.getBlockEntityRenderDispatcher(), client.getEntityModels());
+    };
 
     public AmmoItemRenderer(BlockEntityRenderDispatcher pBlockEntityRenderDispatcher, EntityModelSet pEntityModelSet) {
         super(pBlockEntityRenderDispatcher, pEntityModelSet);

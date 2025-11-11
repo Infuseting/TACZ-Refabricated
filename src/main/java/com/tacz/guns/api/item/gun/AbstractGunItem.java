@@ -371,7 +371,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
     @Override
     @Environment(EnvType.CLIENT)
     public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-        return new GunItemRendererWrapper();
+        return GunItemRendererWrapper.INSTANCE.get();
     }
 
     /**

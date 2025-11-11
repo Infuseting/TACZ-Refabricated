@@ -9,7 +9,6 @@ import com.tacz.guns.client.resource.index.ClientBlockIndex;
 import com.tacz.guns.inventory.tooltip.BlockItemTooltip;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
@@ -32,8 +31,7 @@ public class GunSmithTableItem extends BlockItem implements BlockItemDataAccesso
     @Environment(EnvType.CLIENT)
     @Override
     public BlockEntityWithoutLevelRenderer getCustomRenderer() {
-        Minecraft minecraft = Minecraft.getInstance();
-        return new GunSmithTableItemRenderer(minecraft.getBlockEntityRenderDispatcher(), minecraft.getEntityModels());
+        return GunSmithTableItemRenderer.INSTANCE.get();
     }
 
     public static NonNullList<ItemStack> fillItemCategory() {

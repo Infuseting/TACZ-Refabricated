@@ -6,6 +6,7 @@ import com.mojang.math.Axis;
 import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.model.bedrock.BedrockModel;
 import com.tacz.guns.client.renderer.block.GunSmithTableRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -19,9 +20,15 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nonnull;
+import java.util.function.Supplier;
 
 public class GunSmithTableItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static final SlotModel SLOT_BLOCK_MODEL = new SlotModel();
+
+    public static final Supplier<GunSmithTableItemRenderer> INSTANCE = () -> {
+        Minecraft client = Minecraft.getInstance();
+        return new GunSmithTableItemRenderer(client.getBlockEntityRenderDispatcher(), client.getEntityModels());
+    };
 
     public GunSmithTableItemRenderer(BlockEntityRenderDispatcher dispatcher, EntityModelSet modelSet) {
         super(dispatcher, modelSet);

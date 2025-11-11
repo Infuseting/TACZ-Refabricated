@@ -44,6 +44,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import static net.minecraft.world.item.ItemDisplayContext.*;
 
@@ -54,6 +55,8 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
     private static final SlotModel SLOT_GUN_MODEL = new SlotModel();
     private static BedrockGunModel lastModel = null;
     public static final Vector3f muzzleRenderOffset = new Vector3f();
+
+    public static final Supplier<GunItemRendererWrapper> INSTANCE = GunItemRendererWrapper::new;
 
     public GunItemRendererWrapper() {
         super();
