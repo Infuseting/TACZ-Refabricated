@@ -1,5 +1,6 @@
 package com.tacz.guns.client.renderer.item;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -28,10 +29,10 @@ import java.util.function.Supplier;
 public class AttachmentItemRenderer extends BlockEntityWithoutLevelRenderer {
     public static final SlotModel SLOT_ATTACHMENT_MODEL = new SlotModel();
 
-    public static final Supplier<AttachmentItemRenderer> INSTANCE = () -> {
+    public static final Supplier<AttachmentItemRenderer> INSTANCE = Suppliers.memoize(() -> {
         Minecraft client = Minecraft.getInstance();
         return new AttachmentItemRenderer(client.getBlockEntityRenderDispatcher(), client.getEntityModels());
-    };
+    });
 
     public AttachmentItemRenderer(BlockEntityRenderDispatcher pBlockEntityRenderDispatcher, EntityModelSet pEntityModelSet) {
         super(pBlockEntityRenderDispatcher, pEntityModelSet);

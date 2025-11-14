@@ -1,5 +1,6 @@
 package com.tacz.guns.client.renderer.item;
 
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -31,10 +32,10 @@ import static net.minecraft.world.item.ItemDisplayContext.GUI;
 public class AmmoItemRenderer extends BlockEntityWithoutLevelRenderer {
     private static final SlotModel SLOT_AMMO_MODEL = new SlotModel();
 
-    public static final Supplier<AmmoItemRenderer> INSTANCE = () -> {
+    public static final Supplier<AmmoItemRenderer> INSTANCE = Suppliers.memoize(() -> {
         Minecraft client = Minecraft.getInstance();
         return new AmmoItemRenderer(client.getBlockEntityRenderDispatcher(), client.getEntityModels());
-    };
+    });
 
     public AmmoItemRenderer(BlockEntityRenderDispatcher pBlockEntityRenderDispatcher, EntityModelSet pEntityModelSet) {
         super(pBlockEntityRenderDispatcher, pEntityModelSet);

@@ -1,6 +1,7 @@
 package com.tacz.guns.client.renderer.item;
 
 import cn.sh1rocu.tacz.api.event.ViewportEvent;
+import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
@@ -56,7 +57,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
     private static BedrockGunModel lastModel = null;
     public static final Vector3f muzzleRenderOffset = new Vector3f();
 
-    public static final Supplier<GunItemRendererWrapper> INSTANCE = GunItemRendererWrapper::new;
+    public static final Supplier<GunItemRendererWrapper> INSTANCE = Suppliers.memoize(GunItemRendererWrapper::new);
 
     public GunItemRendererWrapper() {
         super();
