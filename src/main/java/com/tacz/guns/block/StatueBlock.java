@@ -141,7 +141,7 @@ public class StatueBlock extends BaseEntityBlock implements IBlockExtension {
     }
 
     @Override
-    public void onBlockExploded(BlockState state, Level level, BlockPos pos, Explosion explosion) {
-        IBlockExtension.super.onBlockExploded(state, level, pos, explosion);
+    public void tacz$onBlockExploded(BlockState state, Level level, BlockPos pos, Explosion explosion) {
+        IBlockExtension.super.tacz$onBlockExploded(state, level, pos, explosion);
     }
 }

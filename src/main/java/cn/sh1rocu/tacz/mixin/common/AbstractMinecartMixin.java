@@ -16,7 +16,7 @@ public class AbstractMinecartMixin {
     @ModifyExpressionValue(method = "tick", at = @At("MIXINEXTRAS:EXPRESSION"))
     private boolean tacz$canBeRidden(boolean original) {
         if (this instanceof IMinecart minecart)
-            return minecart.canBeRidden();
+            return minecart.tacz$canBeRidden();
         return original;
     }
 }

@@ -8,7 +8,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public interface IBlockExtension {
-    default void onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
+    default void tacz$onBlockExploded(BlockState state, Level world, BlockPos pos, Explosion explosion) {
         world.setBlock(pos, Blocks.AIR.defaultBlockState(), 3);
         ((Block) this).wasExploded(world, pos, explosion);
     }

@@ -9,11 +9,11 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 
 public interface IItem {
-    default int getMaxStackSize(ItemStack stack) {
+    default int tacz$getMaxStackSize(ItemStack stack) {
         return ((Item) this).getMaxStackSize();
     }
 
-    default boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
+    default boolean tacz$onEntitySwing(ItemStack stack, LivingEntity entity) {
         return false;
     }
 

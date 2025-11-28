@@ -18,7 +18,7 @@ public class ArmorStandMixin {
     @ModifyExpressionValue(method = "method_6918", at = @At("MIXINEXTRAS:EXPRESSION"))
     private static boolean tacz$canBeRidden(boolean original, @Local(argsOnly = true) Entity entity) {
         if (entity instanceof IMinecart minecart)
-            return minecart.canBeRidden();
+            return minecart.tacz$canBeRidden();
         return original;
     }
 }

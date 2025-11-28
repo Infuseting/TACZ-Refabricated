@@ -17,7 +17,7 @@ public abstract class ItemStackMixin {
     private int tacz$getMaxStackSize(int original) {
         if (this.getItem() instanceof IItem item) {
             ItemStack stack = (ItemStack) (Object) this;
-            return item.getMaxStackSize(stack);
+            return item.tacz$getMaxStackSize(stack);
         }
         return original;
     }

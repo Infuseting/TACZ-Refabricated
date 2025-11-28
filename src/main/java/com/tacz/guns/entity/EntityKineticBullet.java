@@ -130,9 +130,9 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
     private float cameraYRot;
     private Vector3f firstPersonRenderOffset;
     // 发射的枪械 ID
-    private ResourceLocation gunId;
+    private ResourceLocation gunId = DefaultAssets.EMPTY_GUN_ID;
     // 枪械display ID
-    private ResourceLocation gunDisplayId;
+    private ResourceLocation gunDisplayId = DefaultAssets.DEFAULT_GUN_DISPLAY_ID;
     private float armorIgnore;
     private float headShot;
 

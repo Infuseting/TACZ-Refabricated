@@ -28,7 +28,7 @@ public class ExplosionMixin {
     )
     private void tacz$onBlockExploded(boolean spawnParticles, CallbackInfo ci, @Local(ordinal = 0) BlockPos pos, @Local(ordinal = 0) BlockState state) {
         if (state.getBlock() instanceof IBlockExtension block) {
-            block.onBlockExploded(state, this.level, pos, (Explosion) (Object) this);
+            block.tacz$onBlockExploded(state, this.level, pos, (Explosion) (Object) this);
         }
     }
 }

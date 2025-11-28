@@ -364,7 +364,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      * 阻止玩家手臂挥动
      */
     @Override
-    public boolean onEntitySwing(ItemStack stack, LivingEntity entity) {
+    public boolean tacz$onEntitySwing(ItemStack stack, LivingEntity entity) {
         return true;
     }
 

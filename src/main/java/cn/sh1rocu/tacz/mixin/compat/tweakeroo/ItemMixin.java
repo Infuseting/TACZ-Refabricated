@@ -14,7 +14,7 @@ public class ItemMixin {
     @Inject(method = "getMaxStackSize(Lnet/minecraft/world/item/ItemStack;)I", at = @At("HEAD"), cancellable = true)
     private void getMaxStackSize(ItemStack stack, CallbackInfoReturnable<Integer> cir) {
         if (((Item) (Object) this) instanceof AmmoItem item) {
-            cir.setReturnValue(item.getMaxStackSize(stack));
+            cir.setReturnValue(item.tacz$getMaxStackSize(stack));
         }
     }
 }

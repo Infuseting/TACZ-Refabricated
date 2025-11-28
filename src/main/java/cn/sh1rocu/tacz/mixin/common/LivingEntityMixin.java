@@ -34,7 +34,7 @@ public abstract class LivingEntityMixin {
     private void tacz$swingHand(InteractionHand hand, boolean bl, CallbackInfo ci) {
         ItemStack stack = this.getItemInHand(hand);
         if (!stack.isEmpty() && stack.getItem() instanceof IItem swing) {
-            if (swing.onEntitySwing(stack, (LivingEntity) (Object) this))
+            if (swing.tacz$onEntitySwing(stack, (LivingEntity) (Object) this))
                 ci.cancel();
         }
     }
