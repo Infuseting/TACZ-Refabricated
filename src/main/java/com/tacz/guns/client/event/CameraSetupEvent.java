@@ -209,18 +209,18 @@ public class CameraSetupEvent {
                 IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
                 camera.setXRot(camera.getXRot() - (float) (value - xRotO));
             } else {
-                if (ShoulderSurfingCompat.isInstalled() && ShoulderSurfing.getInstance().isShoulderSurfing()) {
-                    IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
-                    camera.setYRot(camera.getYRot() - (float) (value - yRotO));
-                } else {
-                    player.setYRot(player.getYRot() - (float) (value - yRotO));
-                }
+                player.setXRot(player.getXRot() - (float) (value - xRotO));
             }
             xRotO = value;
         }
         if (yawSplineFunction != null && yawSplineFunction.isValidPoint(timeTotal)) {
             double value = yawSplineFunction.value(timeTotal);
-            player.setYRot(player.getYRot() - (float) (value - yRotO));
+            if (ShoulderSurfingCompat.isInstalled() && ShoulderSurfing.getInstance().isShoulderSurfing()) {
+                IShoulderSurfingCamera camera = ShoulderSurfing.getInstance().getCamera();
+                camera.setYRot(camera.getYRot() - (float) (value - yRotO));
+            } else {
+                player.setYRot(player.getYRot() - (float) (value - yRotO));
+            }
             yRotO = value;
         }
     }
