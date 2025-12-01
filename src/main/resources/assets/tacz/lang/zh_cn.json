@@ -2,7 +2,6 @@
   "block.tacz.statue": "石像",
   "block.tacz.target": "人形标靶",
   "block.tacz.gun_smith_table": "枪械工作台",
-  "commands.tacz.arguments.enum.invalid": "枚举常量必须是{0}中的一个，但发现为{1}",
   "commands.tacz.reload.backup": "§a§l●§r You can find the overwritten files in the §c§nconfig/tacz/backup§r folder",
   "commands.tacz.reload.overwrite_command.off": "§a§l●§r 你可以使用指令 §c§n/tacz overwrite true§r 来启用覆盖功能。",
   "commands.tacz.reload.overwrite_command.on": "§a§l●§r 你可以使用指令 §c§n/tacz overwrite false§r 来禁用覆盖功能。",
@@ -15,6 +14,7 @@
   "commands.tacz.config.server_shoot_network_check.disabled": "§a§l[TACZ]§r 服务端射击网络检查已关闭",
   "commands.tacz.config.server_shoot_cooldown_check.enabled": "§a§l[TACZ]§r 服务端射击冷却检查已启用",
   "commands.tacz.config.server_shoot_cooldown_check.disabled": "§a§l[TACZ]§r 服务端射击冷却检查已关闭\n §6警告: 关闭此项会导致服务端完全不计算枪械开火冷却，这将导致潜在的作弊可能。你仅应该在经常完全无法开火的时候尝试关闭它。",
+
   "config.tacz.open_gunpack_folder": "打开枪包文件夹",
   "config.tacz.client.key": "按键",
   "config.tacz.client.key.hold_to_aim": "长按瞄准",
