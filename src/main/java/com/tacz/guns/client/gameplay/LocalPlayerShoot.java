@@ -20,6 +20,7 @@ import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.modifier.AttachmentCacheProperty;
 import com.tacz.guns.resource.modifier.custom.SilenceModifier;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
+import com.tacz.guns.resource.pojo.data.gun.ChargeData;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.sound.SoundManager;
 import it.unimi.dsi.fastutil.Pair;
@@ -28,6 +29,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.concurrent.ScheduledFuture;
@@ -45,24 +47,46 @@ public class LocalPlayerShoot {
         this.player = player;
     }
 
-    public ShootResult shoot() {
-        // 按钮冷却时间未到，防止点击按钮后误触开火
-        // 默认设置为 50 ms
-        if (System.currentTimeMillis() - LocalPlayerDataHolder.clientClickButtonTimestamp < 50) {
-            return ShootResult.COOL_DOWN;
-        }
-        // 如果上一次异步开火的效果还未执行，则直接返回，等待异步开火效果执行
-        if (!data.isShootRecorded) {
-            return ShootResult.COOL_DOWN;
-        }
-        // 如果状态锁正在准备锁定，且不是开火的状态锁，则不允许开火(主要用于防止切枪后开火动作覆盖切枪动作)
-        if (data.clientStateLock && data.lockedCondition != SHOOT_LOCKED_CONDITION && data.lockedCondition != null) {
-            data.isShootRecorded = true;
-            // 因为这块主要目的是防止切枪后开火动作覆盖切枪动作，返回 IS_DRAWING
-            return ShootResult.IS_DRAWING;
-        }
-        // 暂定为只有主手能开枪
+    public boolean chargeShoot(boolean isCharging) {
+        // 因为开火冷却检测用了特别定制的方法，所以不检查状态锁，而是手动检查是否换弹、切枪
+        IGunOperator gunOperator = IGunOperator.fromLivingEntity(player);
         ItemStack mainHandItem = player.getMainHandItem();
+        // 暂定为只有主手能开枪
+        if (!(mainHandItem.getItem() instanceof IGun iGun)) {
+            data.chargeProgress = 0f;
+            return false;
+        }
+        ResourceLocation gunId = iGun.getGunId(mainHandItem);
+        Optional<ClientGunIndex> gunIndexOptional = TimelessAPI.getClientGunIndex(gunId);
+        GunDisplayInstance display = TimelessAPI.getGunDisplay(mainHandItem).orElse(null);
+        if (gunIndexOptional.isEmpty() || display == null) {
+            return false;
+        }
+        ClientGunIndex gunIndex = gunIndexOptional.get();
+        GunData gunData = gunIndex.getGunData();
+        FireMode fireMode = iGun.getFireMode(mainHandItem);
+        ChargeData chargeData = gunData.getChargeData(fireMode);
+        if (chargeData == null) {
+            return true;
+        }
+
+        long coolDown = this.getCoolDown(iGun, mainHandItem, gunData);
+        boolean flag = preCheck(iGun, gunOperator, gunIndex, mainHandItem, display, gunData) == null;
+        var chargeProgress = data.chargeProgress;
+
+        if (isCharging && flag) {
+            data.chargeProgress = Math.min(chargeProgress + chargeData.getIncreasePerTick(), chargeData.getMaxCharge());
+        } else {
+            data.chargeProgress = Math.max(chargeProgress - chargeData.getDecreasePerTick(), 0f);
+        }
+        return data.chargeProgress >= chargeData.getFireThreshold();
+    }
+
+    public ShootResult shoot() {
+        // 因为开火冷却检测用了特别定制的方法，所以不检查状态锁，而是手动检查是否换弹、切枪
+        IGunOperator gunOperator = IGunOperator.fromLivingEntity(player);
+        ItemStack mainHandItem = player.getMainHandItem();
+        // 暂定为只有主手能开枪
         if (!(mainHandItem.getItem() instanceof IGun iGun)) {
             return ShootResult.NOT_GUN;
         }
@@ -75,15 +99,56 @@ public class LocalPlayerShoot {
         ClientGunIndex gunIndex = gunIndexOptional.get();
         GunData gunData = gunIndex.getGunData();
         long coolDown = this.getCoolDown(iGun, mainHandItem, gunData);
+
+        // 如果上一次异步开火的效果还未执行，则直接返回，等待异步开火效果执行
+        if (!data.isShootRecorded) {
+            return ShootResult.COOL_DOWN;
+        }
+        // 如果状态锁正在准备锁定，且不是开火的状态锁，则不允许开火(主要用于防止切枪后开火动作覆盖切枪动作)
+        if (data.clientStateLock && data.lockedCondition != SHOOT_LOCKED_CONDITION && data.lockedCondition != null) {
+            data.isShootRecorded = true;
+            // 因为这块主要目的是防止切枪后开火动作覆盖切枪动作，返回 IS_DRAWING
+            return ShootResult.IS_DRAWING;
+        }
+
         // 如果射击冷却大于等于 1 tick (即 50 ms)，则不允许开火
         if (coolDown >= 50) {
             return ShootResult.COOL_DOWN;
         }
-        // 因为开火冷却检测用了特别定制的方法，所以不检查状态锁，而是手动检查是否换弹、切枪
-        IGunOperator gunOperator = IGunOperator.fromLivingEntity(player);
+
+        // 基础检查
+        ShootResult result = preCheck(iGun, gunOperator, gunIndex, mainHandItem, display, gunData);
+        if (result != null) {
+            return result;
+        }
+
+        // 检查是否正在奔跑
+        if (gunOperator.getSynSprintTime() > 0) {
+            return ShootResult.IS_SPRINTING;
+        }
+        // 触发开火事件
+        var event = new GunShootEvent(player, mainHandItem, LogicalSide.CLIENT);
+        GunShootEvent.CALLBACK.invoker().post(event);
+        if (event.isCanceled()) {
+            return ShootResult.FORGE_EVENT_CANCEL;
+        }
+        // 切换状态锁，不允许换弹、检视等行为进行。
+        data.lockState(SHOOT_LOCKED_CONDITION);
+        data.isShootRecorded = false;
+        // 调用开火逻辑
+        this.doShoot(display, iGun, mainHandItem, gunData, coolDown);
+        return ShootResult.SUCCESS;
+    }
+
+    private @Nullable ShootResult preCheck(IGun iGun, IGunOperator gunOperator, ClientGunIndex gunIndex, ItemStack mainHandItem, GunDisplayInstance display, GunData gunData) {
+        // 按钮冷却时间未到，防止点击按钮后误触开火
+        // 默认设置为 50 ms
+        if (System.currentTimeMillis() - LocalPlayerDataHolder.clientClickButtonTimestamp < 50) {
+            return ShootResult.COOL_DOWN;
+        }
+
         // 检查是否正在换弹
         if (gunOperator.getSynReloadState().getStateType().isReloading()) {
-
             return ShootResult.IS_RELOADING;
         }
         // 检查是否正在切枪
@@ -126,22 +191,7 @@ public class LocalPlayerShoot {
             IClientPlayerGunOperator.fromLocalPlayer(player).bolt();
             return ShootResult.NEED_BOLT;
         }
-        // 检查是否正在奔跑
-        if (gunOperator.getSynSprintTime() > 0) {
-            return ShootResult.IS_SPRINTING;
-        }
-        // 触发开火事件
-        GunShootEvent gunShootEvent = new GunShootEvent(player, mainHandItem, LogicalSide.CLIENT);
-        GunShootEvent.CALLBACK.invoker().post(gunShootEvent);
-        if (gunShootEvent.isCanceled()) {
-            return ShootResult.FORGE_EVENT_CANCEL;
-        }
-        // 切换状态锁，不允许换弹、检视等行为进行。
-        data.lockState(SHOOT_LOCKED_CONDITION);
-        data.isShootRecorded = false;
-        // 调用开火逻辑
-        this.doShoot(display, iGun, mainHandItem, gunData, coolDown);
-        return ShootResult.SUCCESS;
+        return null;
     }
 
     private void doShoot(GunDisplayInstance display, IGun iGun, ItemStack mainHandItem, GunData gunData, long delay) {
@@ -196,9 +246,9 @@ public class LocalPlayerShoot {
             // 播放声音和状态机触发需要从异步线程上传到主线程执行，否则会引起cme
             ((BlockableEventLoopAccessor) Minecraft.getInstance()).tacz$submitAsync(() -> {
                 // 触发击发事件
-                GunFireEvent gunFireEvent = new GunFireEvent(player, mainHandItem, LogicalSide.CLIENT);
-                GunFireEvent.CALLBACK.invoker().post(gunFireEvent);
-                boolean fire = !gunFireEvent.isCanceled();
+                var event = new GunFireEvent(player, mainHandItem, LogicalSide.CLIENT);
+                GunFireEvent.CALLBACK.invoker().post(event);
+                boolean fire = !event.isCanceled();
                 if (fire) {
                     // 动画和声音循环播放
                     AnimationStateMachine<?> animationStateMachine = display.getAnimationStateMachine();
