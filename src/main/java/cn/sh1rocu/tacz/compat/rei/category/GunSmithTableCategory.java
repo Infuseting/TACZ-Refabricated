@@ -1,6 +1,8 @@
 package cn.sh1rocu.tacz.compat.rei.category;
 
 import cn.sh1rocu.tacz.compat.rei.display.GunSmithTableDisplay;
+import com.tacz.guns.crafting.GunSmithTableIngredient;
+import com.tacz.guns.crafting.GunSmithTableRecipe;
 import me.shedaniel.math.Point;
 import me.shedaniel.math.Rectangle;
 import me.shedaniel.rei.api.client.gui.Renderer;
@@ -8,12 +10,15 @@ import me.shedaniel.rei.api.client.gui.widgets.Widget;
 import me.shedaniel.rei.api.client.gui.widgets.Widgets;
 import me.shedaniel.rei.api.client.registry.display.DisplayCategory;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.entry.EntryStack;
+import me.shedaniel.rei.api.common.entry.type.VanillaEntryTypes;
 import me.shedaniel.rei.api.common.util.EntryStacks;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class GunSmithTableCategory implements DisplayCategory<GunSmithTableDisplay> {
@@ -29,8 +34,9 @@ public class GunSmithTableCategory implements DisplayCategory<GunSmithTableDispl
 
     @Override
     public List<Widget> setupDisplay(GunSmithTableDisplay display, Rectangle bounds) {
-        List<EntryIngredient> inputs = display.getInputEntries();
-        List<EntryIngredient> outputs = display.getOutputEntries();
+        GunSmithTableRecipe recipe = display.getRecipe();
+        List<GunSmithTableIngredient> inputs = recipe.getInputs();
+        EntryStack<ItemStack> output = EntryStack.of(VanillaEntryTypes.ITEM, recipe.getOutput());
 
         List<Widget> widgets = new ArrayList<>();
         widgets.add(Widgets.createRecipeBase(bounds));
@@ -38,7 +44,7 @@ public class GunSmithTableCategory implements DisplayCategory<GunSmithTableDispl
         int startX = bounds.x + 5;
         int startY = bounds.y;
 
-        widgets.add(Widgets.createSlot(new Point(startX + 3, startY + 12)).entries(outputs.get(0)).markOutput());
+        widgets.add(Widgets.createSlot(new Point(startX + 3, startY + 12)).entry(output).markOutput());
 
         int size = inputs.size();
         // 单行排布
@@ -66,11 +72,13 @@ public class GunSmithTableCategory implements DisplayCategory<GunSmithTableDispl
         return widgets;
     }
 
-    private EntryIngredient getInput(List<EntryIngredient> inputs, int index) {
+    private List<EntryStack<ItemStack>> getInput(List<GunSmithTableIngredient> inputs, int index) {
         if (index < inputs.size()) {
-            return inputs.get(index);
+            GunSmithTableIngredient ingredient = inputs.get(index);
+            ItemStack[] items = ingredient.getIngredient().getItems();
+            return Arrays.stream(items).map(stack -> EntryStack.of(VanillaEntryTypes.ITEM, stack.copyWithCount(ingredient.getCount()))).toList();
         }
-        return EntryIngredient.empty();
+        return Collections.singletonList(EntryStack.of(VanillaEntryTypes.ITEM, ItemStack.EMPTY));
     }
 
     @Override

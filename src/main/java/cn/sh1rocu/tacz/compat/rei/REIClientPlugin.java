@@ -57,7 +57,7 @@ public class REIClientPlugin implements me.shedaniel.rei.api.client.plugins.REIC
                 List<GunSmithTableRecipe> recipeList = blockIndex.getFilter().filter(recipes, GunSmithTableRecipe::getId);
                 recipeList.removeIf(recipe ->
                         blockIndex.getData().getTabs().stream().noneMatch(tab -> Objects.equals(tab.id(), recipe.getResult().getGroup())));
-                recipeList.forEach(recipe -> registry.add(new GunSmithTableDisplay(recipe, entry.getValue())));
+                recipeList.forEach(recipe -> registry.add(new GunSmithTableDisplay(recipe, entry)));
             });
         }
 

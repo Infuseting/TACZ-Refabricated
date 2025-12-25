@@ -1,21 +1,23 @@
 package cn.sh1rocu.tacz.compat.rei.display;
 
-import com.tacz.guns.crafting.GunSmithTableIngredient;
 import com.tacz.guns.crafting.GunSmithTableRecipe;
 import me.shedaniel.rei.api.common.category.CategoryIdentifier;
-import me.shedaniel.rei.api.common.display.Display;
-import me.shedaniel.rei.api.common.entry.EntryIngredient;
+import me.shedaniel.rei.api.common.display.basic.BasicDisplay;
 import me.shedaniel.rei.api.common.util.EntryIngredients;
+import net.minecraft.resources.ResourceLocation;
 
-import java.util.List;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Optional;
 
-public class GunSmithTableDisplay implements Display {
+public class GunSmithTableDisplay extends BasicDisplay {
     private final GunSmithTableRecipe recipe;
-    private final CategoryIdentifier<GunSmithTableDisplay> id;
+    private final Map.Entry<ResourceLocation, CategoryIdentifier<GunSmithTableDisplay>> entry;
 
-    public GunSmithTableDisplay(GunSmithTableRecipe recipe, CategoryIdentifier<GunSmithTableDisplay> id) {
+    public GunSmithTableDisplay(GunSmithTableRecipe recipe, Map.Entry<ResourceLocation, CategoryIdentifier<GunSmithTableDisplay>> entry) {
+        super(EntryIngredients.ofIngredients(recipe.getIngredients()), Collections.singletonList(EntryIngredients.of(recipe.getOutput())), Optional.ofNullable(entry.getKey()));
         this.recipe = recipe;
-        this.id = id;
+        this.entry = entry;
     }
 
     public GunSmithTableRecipe getRecipe() {
@@ -23,17 +25,7 @@ public class GunSmithTableDisplay implements Display {
     }
 
     @Override
-    public List<EntryIngredient> getInputEntries() {
-        return EntryIngredients.ofIngredients(recipe.getInputs().stream().map(GunSmithTableIngredient::getIngredient).toList());
-    }
-
-    @Override
-    public List<EntryIngredient> getOutputEntries() {
-        return List.of(EntryIngredients.of(recipe.getOutput()));
-    }
-
-    @Override
     public CategoryIdentifier<?> getCategoryIdentifier() {
-        return id;
+        return entry.getValue();
     }
 }
