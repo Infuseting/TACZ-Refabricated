@@ -204,6 +204,9 @@ dependencies {
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:$rei_version"
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-default-plugin-fabric:$rei_version"
+
+    // 加速渲染
+    modImplementation "maven.modrinth:accrelatedrendering-refabricated:1.0.8-1.20.1-alpha-fabric.1"
 }
 
 processResources {
