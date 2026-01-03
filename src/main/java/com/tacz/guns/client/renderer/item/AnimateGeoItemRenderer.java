@@ -388,4 +388,9 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
         }
         return ItemStack.matches(oldStack, newStack);
     }
+
+    @Override
+    public boolean blockOffhandRender() {
+        return true;
+    }
 }
