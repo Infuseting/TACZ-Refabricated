@@ -1,5 +1,6 @@
 {
   "values": [
-    "#c:sand"
+    "#forge:sand/colorless",
+    "#forge:sand/red"
   ]
 }

@@ -1,5 +1,7 @@
 {
   "values": [
-    "#c:glass_blocks"
+    "#forge:glass/colorless",
+    "#forge:stained_glass",
+    "#forge:glass/tinted"
   ]
 }

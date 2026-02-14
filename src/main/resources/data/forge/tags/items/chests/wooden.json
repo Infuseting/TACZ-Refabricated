@@ -1,5 +1,6 @@
 {
   "values": [
-    "#c:wooden_chests"
+    "minecraft:chest",
+    "minecraft:trapped_chest"
   ]
 }

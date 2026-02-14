@@ -1,5 +1,10 @@
 {
   "values": [
-    "#c:gems"
+    "#forge:gems/amethyst",
+    "#forge:gems/diamond",
+    "#forge:gems/emerald",
+    "#forge:gems/lapis",
+    "#forge:gems/prismarine",
+    "#forge:gems/quartz"
   ]
 }

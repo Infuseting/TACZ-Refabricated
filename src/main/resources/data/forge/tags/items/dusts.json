@@ -1,5 +1,7 @@
 {
   "values": [
-    "#c:dusts"
+    "#forge:dusts/glowstone",
+    "#forge:dusts/prismarine",
+    "#forge:dusts/redstone"
   ]
 }

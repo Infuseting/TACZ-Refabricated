@@ -1,5 +1,8 @@
 {
   "values": [
-    "#c:seeds"
+    "#forge:seeds/beetroot",
+    "#forge:seeds/melon",
+    "#forge:seeds/pumpkin",
+    "#forge:seeds/wheat"
   ]
 }

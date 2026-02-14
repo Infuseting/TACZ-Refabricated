@@ -1,5 +1,6 @@
 {
   "values": [
-    "#c:fences"
+    "#forge:fences/nether_brick",
+    "#forge:fences/wooden"
   ]
 }

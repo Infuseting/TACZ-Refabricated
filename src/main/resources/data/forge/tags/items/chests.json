@@ -1,5 +1,7 @@
 {
   "values": [
-    "#c:chests"
+    "#forge:chests/ender",
+    "#forge:chests/trapped",
+    "#forge:chests/wooden"
   ]
 }

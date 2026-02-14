@@ -1,5 +1,6 @@
 {
   "values": [
-    "#c:nuggets"
+    "#forge:nuggets/iron",
+    "#forge:nuggets/gold"
   ]
 }
