@@ -99,11 +99,10 @@ public class NetworkHandler {
      * 发送给所有监听此实体的玩家
      */
     public static void sendToTrackingEntityAndSelf(Entity centerEntity, FabricPacket message) {
-        if (centerEntity.level() instanceof ServerLevel serverLevel) {
-            for (ServerPlayer player : PlayerLookup.tracking(serverLevel, centerEntity.blockPosition())) {
-                ServerPlayNetworking.send(player, message);
-            }
+        if (centerEntity instanceof ServerPlayer player) {
+            sendToClientPlayer(message, player);
         }
+        sendToTrackingEntity(message, centerEntity);
     }
 
     public static void sendToAllPlayers(FabricPacket message, MinecraftServer server) {
