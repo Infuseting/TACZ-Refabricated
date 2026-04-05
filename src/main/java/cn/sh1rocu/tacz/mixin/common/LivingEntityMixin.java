@@ -26,8 +26,7 @@ public abstract class LivingEntityMixin {
 
     @ModifyReturnValue(method = "createLivingAttributes", at = @At("RETURN"))
     private static AttributeSupplier.Builder tacz$createLivingAttributes(AttributeSupplier.Builder original) {
-        original.add(ModAttributes.BULLET_RESISTANCE);
-        return original;
+        return original.add(ModAttributes.BULLET_RESISTANCE);
     }
 
     @Inject(method = "swing(Lnet/minecraft/world/InteractionHand;Z)V", at = @At("HEAD"), cancellable = true)
