@@ -71,7 +71,7 @@ public abstract class IngredientMixin {
     private static void tacz$injectFromNetwork(FriendlyByteBuf buf, CallbackInfoReturnable<Ingredient> cir) {
         int index = buf.readerIndex();
 
-        if (buf.readUtf().equals("tacz_ingredient")) {
+        if (buf.isReadable() && buf.readUtf().equals("tacz_ingredient")) {
             ResourceLocation id = buf.readResourceLocation();
             CustomIngredientSerializer<?> serializer = null;
 
