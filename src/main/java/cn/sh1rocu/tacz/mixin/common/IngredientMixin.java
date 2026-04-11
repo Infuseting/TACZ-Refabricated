@@ -70,18 +70,21 @@ public abstract class IngredientMixin {
     )
     private static void tacz$injectFromNetwork(FriendlyByteBuf buf, CallbackInfoReturnable<Ingredient> cir) {
         int index = buf.readerIndex();
+        try {
+            if (buf.readUtf().equals("tacz_ingredient")) {
+                ResourceLocation id = buf.readResourceLocation();
+                CustomIngredientSerializer<?> serializer = null;
 
-        if (buf.isReadable() && buf.readUtf().equals("tacz_ingredient")) {
-            ResourceLocation id = buf.readResourceLocation();
-            CustomIngredientSerializer<?> serializer = null;
+                if (id.equals(StrictNBTIngredient.ID)) serializer = StrictNBTIngredient.Serializer.INSTANCE;
+                else if (id.equals(PartialNBTIngredient.ID)) serializer = PartialNBTIngredient.Serializer.INSTANCE;
 
-            if (id.equals(StrictNBTIngredient.ID)) serializer = StrictNBTIngredient.Serializer.INSTANCE;
-            else if (id.equals(PartialNBTIngredient.ID)) serializer = PartialNBTIngredient.Serializer.INSTANCE;
-
-            if (serializer != null) {
-                cir.setReturnValue(serializer.read(buf).toVanilla());
+                if (serializer != null) {
+                    cir.setReturnValue(serializer.read(buf).toVanilla());
+                }
+            } else {
+                buf.readerIndex(index);
             }
-        } else {
+        } catch (Exception e) {
             buf.readerIndex(index);
         }
     }
