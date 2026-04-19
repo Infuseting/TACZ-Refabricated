@@ -59,6 +59,7 @@ public class ShootKey {
                 LocalPlayerSprint.stopSprint = true;
             } else {
                 lastTimeShootSuccess = false;
+                SoundPlayManager.resetDryFireSound();
             }
         }
     }
