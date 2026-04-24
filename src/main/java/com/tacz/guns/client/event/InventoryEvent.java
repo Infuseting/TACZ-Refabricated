@@ -5,6 +5,7 @@ import com.tacz.guns.api.client.event.SwapItemWithOffHand;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
 import com.tacz.guns.api.item.IAnimationItem;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.client.resource.ClientIndexManager;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
@@ -18,14 +19,15 @@ public class InventoryEvent {
     private static int oldHotbarSelected = -1;
     private static ItemStack oldHotbarSelectItem = ItemStack.EMPTY;
 
-    public static void onPlayerChangeSelect(Minecraft client) {
-        LocalPlayer player = client.player;
+    public static void onPlayerChangeSelect(Minecraft client, boolean isPhaseEnd) {
+        LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
             return;
         }
         Inventory inventory = player.getInventory();
         // 玩家切换选中框的情况
         if (oldHotbarSelected != inventory.selected) {
+            ClientIndexManager.warmUpItem(inventory.getItem(inventory.selected));
             if (oldHotbarSelected == -1) {
                 IClientPlayerGunOperator.fromLocalPlayer(player).draw(ItemStack.EMPTY);
             } else {
@@ -49,6 +51,9 @@ public class InventoryEvent {
 
         if (!ItemStack.matches(oldHotbarSelectItem, currentItem)) {
             oldHotbarSelectItem = currentItem.copy();
+        }
+        if (isPhaseEnd && (player.tickCount & 7) == 0) {
+            ClientIndexManager.warmUpInventoryModels();
         }
     }
 

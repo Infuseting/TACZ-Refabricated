@@ -13,13 +13,11 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @Environment(EnvType.CLIENT)
 public class FirstPersonRenderEvent {
     private static AnimationStateMachine<?> lastStateMachine = null;
 
-    @SubscribeEvent
     public static void onRenderHand(RenderHandEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {

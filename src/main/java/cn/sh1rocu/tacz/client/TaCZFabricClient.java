@@ -63,8 +63,8 @@ public class TaCZFabricClient implements ClientModInitializer {
         RenderItemInHandBobEvent.VIEW.register(FirstPersonRenderGunEvent::cancelItemInHandViewBobbing);
         GunFireEvent.CALLBACK.register(FirstPersonRenderGunEvent::onGunFire);
 
-        ClientTickEvents.START_CLIENT_TICK.register(InventoryEvent::onPlayerChangeSelect);
-        ClientTickEvents.END_CLIENT_TICK.register(InventoryEvent::onPlayerChangeSelect);
+        ClientTickEvents.START_CLIENT_TICK.register(client -> InventoryEvent.onPlayerChangeSelect(client, false));
+        ClientTickEvents.END_CLIENT_TICK.register(client -> InventoryEvent.onPlayerChangeSelect(client, true));
         SwapItemWithOffHand.CALLBACK.register(InventoryEvent::onPlayerSwapMainHand);
         ClientPlayerNetworkEvent.LOGGING_OUT.register(InventoryEvent::onPlayerLoggedOut);
 
