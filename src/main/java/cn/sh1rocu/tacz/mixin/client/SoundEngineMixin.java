@@ -5,6 +5,7 @@ import cn.sh1rocu.tacz.util.SoundConsumerStorage;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.blaze3d.audio.Channel;
 import com.mojang.blaze3d.audio.Library;
+import com.tacz.guns.client.event.SoundEngineEvent;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.resources.sounds.Sound;
@@ -19,10 +20,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.function.Consumer;
 
-// From Kilt
 @Environment(EnvType.CLIENT)
 @Mixin(SoundEngine.class)
 public abstract class SoundEngineMixin {
+    @Inject(method = {"<init>", "reload"}, at = @At("TAIL"))
+    private void tacz$callEngineLoadEvent(CallbackInfo ci) {
+        SoundEngineEvent.onSoundEngineLoad((SoundEngine) (Object) this);
+    }
+
+    // From Kilt
     @Inject(method = "play", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V", shift = At.Shift.AFTER))
     private void tacz$prepareChannelInfo(SoundInstance soundInstance, CallbackInfo ci, @Local ChannelAccess.ChannelHandle channelHandle, @Local Sound sound) {
         var injection = ((ChannelAccessHandleInjection) channelHandle);
@@ -36,6 +42,7 @@ public abstract class SoundEngineMixin {
         injection.tacz$setSoundEngine((SoundEngine) (Object) this);
     }
 
+    // From Kilt
     @ModifyArg(method = "method_19757", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"))
     private static Consumer<Channel> tacz$storeSourceConsumer(Consumer<Channel> consumer) {
         SoundConsumerStorage.soundConsumerChannels.add(consumer);
@@ -43,6 +50,7 @@ public abstract class SoundEngineMixin {
     }
 
     // 暂时用不到
+    // From Kilt
 /*    @ModifyArg(method = "method_19758", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/sounds/ChannelAccess$ChannelHandle;execute(Ljava/util/function/Consumer;)V"))
     private static Consumer<Channel> tacz$storeStreamConsumer(Consumer<Channel> consumer) {
         SoundConsumerStorage.soundConsumerChannels.add(consumer);

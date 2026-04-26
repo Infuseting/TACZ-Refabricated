@@ -15,6 +15,9 @@ import net.minecraft.world.item.ItemStack;
 
 @Environment(EnvType.CLIENT)
 public class InventoryEvent {
+    private static final int HOTBAR_WARM_UP_INTERVAL_TICKS = 7;
+    private static final int BACKPACK_WARM_UP_INTERVAL_TICKS = 41;
+
     // 用于切枪逻辑
     private static int oldHotbarSelected = -1;
     private static ItemStack oldHotbarSelectItem = ItemStack.EMPTY;
@@ -52,8 +55,13 @@ public class InventoryEvent {
         if (!ItemStack.matches(oldHotbarSelectItem, currentItem)) {
             oldHotbarSelectItem = currentItem.copy();
         }
-        if (isPhaseEnd && (player.tickCount & 7) == 0) {
-            ClientIndexManager.warmUpInventoryModels();
+        if (isPhaseEnd) {
+            if (player.tickCount % HOTBAR_WARM_UP_INTERVAL_TICKS == 0) {
+                ClientIndexManager.warmUpEquippedAndHotbarModels();
+            }
+            if (player.tickCount % BACKPACK_WARM_UP_INTERVAL_TICKS == 0) {
+                ClientIndexManager.warmUpBackpackModels();
+            }
         }
     }
 
