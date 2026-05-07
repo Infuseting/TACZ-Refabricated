@@ -29,7 +29,7 @@ public class ShootKey {
     private static boolean lastTimeShootSuccess = false;
 
     public static void autoShoot(Minecraft mc, boolean isPhaseEnd) {
-        if (!isPhaseEnd && !isInGame()) {
+        if (!isPhaseEnd || !isInGame()) {
             return;
         }
         LocalPlayerSprint.stopSprint = false;
