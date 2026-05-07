@@ -1,11 +1,15 @@
 package com.tacz.guns.client.renderer.item;
 
-import cn.sh1rocu.tacz.api.event.ViewportEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
+import com.github.mcmodderanchor.simplebedrockmodel.v1.client.animation.IFPAnimationInstance;
+import com.github.mcmodderanchor.simplebedrockmodel.v1.client.renderer.IFPGeoItemRenderer;
+import com.maydaymemory.mae.basic.DummyPose;
+import com.maydaymemory.mae.basic.Pose;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import com.tacz.guns.api.client.animation.statemachine.LuaAnimationStateMachine;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
-import com.tacz.guns.api.client.other.KeepingItemRenderer;
+import com.tacz.guns.api.item.IAnimationItem;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
 import com.tacz.guns.client.animation.statemachine.ItemAnimationStateContext;
 import com.tacz.guns.client.model.BedrockAnimatedModel;
@@ -20,9 +24,11 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
@@ -38,10 +44,16 @@ import java.util.List;
  * @param <CTX> 动画状态机上下文
  */
 public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX extends ItemAnimationStateContext>
-        extends BlockEntityWithoutLevelRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
+        extends BlockEntityWithoutLevelRenderer implements IFPGeoItemRenderer, BuiltinItemRendererRegistry.DynamicItemRenderer {
     @Nullable
     protected LuaAnimationStateMachine<CTX> stateMachine;
     protected M model;
+
+    @Override
+    public void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
+        this.renderByItem(stack, mode, matrices, vertexConsumers, light, overlay);
+    }
+
     public ResourceLocation textureLocation;
 
     public AnimateGeoItemRenderer() {
@@ -121,7 +133,7 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
         });
         if (stateMachine.isInitialized()) {
             stateMachine.trigger(GunAnimationConstant.INPUT_PUT_AWAY);
-            KeepingItemRenderer.getRenderer().keep(stack, putAwayTime);
+//            KeepingItemRenderer.getRenderer().keep(stack, putAwayTime);
             stateMachine.exit();
             // 需要设置的比动画稍长些，避免意外的重初始化（可能是丢精度了）
             // 延后一tick应该基本没有感知）
@@ -266,11 +278,6 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
         }
     }
 
-    @Override
-    public void render(ItemStack itemStack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int light, int overlay) {
-        renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, light, overlay);
-    }
-
     /**
      * 获取摄像机定位组的反相矩阵
      */
@@ -311,5 +318,74 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
         poseStack.translate(0, 1.5f, 0);
         poseStack.mulPoseMatrix(transformMatrix);
         poseStack.translate(0, -1.5f, 0);
+    }
+
+    @Override
+    public long getPutAwayDuration(ItemStack stack) {
+        return this.getPutAwayTime(stack);
+    }
+
+    @Nullable
+    @Override
+    public IFPAnimationInstance createAnimationInstance(ItemStack stack, Entity entity) {
+        return new IFPAnimationInstance() {
+            private boolean drawn = false;
+            private ItemStack lastItem = stack;
+
+            @Override
+            public ItemStack currentItem() {
+                return lastItem;
+            }
+
+            @Override
+            public Pose getPose() {
+                return DummyPose.INSTANCE;
+            }
+
+            @Override
+            public void tick(float v) {
+
+            }
+
+            @Override
+            public @NotNull Quaternionf getCameraRotation() {
+                return new Quaternionf();
+            }
+
+            @Override
+            public void setCameraRotation(@NotNull Quaternionf quaternionf) {
+
+            }
+
+            @Override
+            public Pose getCachedPose() {
+                return DummyPose.INSTANCE;
+            }
+
+            @Override
+            public void updateItem(ItemStack itemStack) {
+                lastItem = itemStack;
+            }
+
+            @Override
+            public void triggerDraw() {
+                if (drawn) return;
+                drawn = true;
+                tryInit(lastItem, Minecraft.getInstance().player, 0);
+            }
+
+            @Override
+            public void triggerPutAway() {
+                tryExit(lastItem, getPutAwayTime(lastItem));
+            }
+        };
+    }
+
+    @Override
+    public boolean isSameItem(ItemStack oldStack, ItemStack newStack) {
+        if (oldStack.getItem() instanceof IAnimationItem item) {
+            return item.isSame(oldStack, newStack);
+        }
+        return ItemStack.matches(oldStack, newStack);
     }
 }

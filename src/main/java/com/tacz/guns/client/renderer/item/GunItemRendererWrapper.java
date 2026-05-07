@@ -1,6 +1,6 @@
 package com.tacz.guns.client.renderer.item;
 
-import cn.sh1rocu.tacz.api.event.ViewportEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import com.google.common.base.Suppliers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -9,7 +9,6 @@ import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.client.animation.statemachine.LuaAnimationStateMachine;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
 import com.tacz.guns.api.client.gameplay.IClientPlayerGunOperator;
-import com.tacz.guns.api.client.other.KeepingItemRenderer;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.animation.screen.RefitTransform;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
@@ -93,7 +92,7 @@ public class GunItemRendererWrapper extends AnimateGeoItemRenderer<BedrockGunMod
         });
         if (stateMachine.isInitialized()) {
             stateMachine.trigger(GunAnimationConstant.INPUT_PUT_AWAY);
-            KeepingItemRenderer.getRenderer().keep(stack, putAwayTime);
+//            KeepingItemRenderer.getRenderer().keep(stack, putAwayTime);
             stateMachine.exit();
             stateMachine.setExitingTime(putAwayTime + 50);
         }

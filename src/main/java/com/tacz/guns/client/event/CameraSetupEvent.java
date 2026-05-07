@@ -1,8 +1,7 @@
 package com.tacz.guns.client.event;
 
+import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.tacz.api.event.ComputeFovModifierEvent;
-import cn.sh1rocu.tacz.api.event.ViewportEvent;
-import cn.sh1rocu.tacz.api.extension.IItem;
 import com.github.exopandora.shouldersurfing.api.client.IShoulderSurfingCamera;
 import com.github.exopandora.shouldersurfing.api.client.ShoulderSurfing;
 import com.tacz.guns.api.DefaultAssets;
@@ -29,6 +28,7 @@ import com.tacz.guns.util.math.MathUtil;
 import com.tacz.guns.util.math.SecondOrderDynamics;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
@@ -65,7 +65,7 @@ public class CameraSetupEvent {
         }
         ItemStack stack = KeepingItemRenderer.getRenderer().getCurrentItem();
         // 尝试调用物品的自定义相机动画
-        if (stack.getItem() instanceof IItem item && item.getCustomRenderer() instanceof AnimateGeoItemRenderer<?, ?> renderer) {
+        if (BuiltinItemRendererRegistry.INSTANCE.get(stack.getItem()) instanceof AnimateGeoItemRenderer<?, ?> renderer) {
             renderer.applyLevelCameraAnimation(event, stack, player);
         }
 
@@ -81,7 +81,7 @@ public class CameraSetupEvent {
         }
         ItemStack stack = KeepingItemRenderer.getRenderer().getCurrentItem();
         // 尝试调用物品的自定义相机动画
-        if (stack.getItem() instanceof IItem item && item.getCustomRenderer() instanceof AnimateGeoItemRenderer<?, ?> renderer) {
+        if (BuiltinItemRendererRegistry.INSTANCE.get(stack.getItem()) instanceof AnimateGeoItemRenderer<?, ?> renderer) {
             renderer.applyItemInHandCameraAnimation(event, stack, player);
         }
     }

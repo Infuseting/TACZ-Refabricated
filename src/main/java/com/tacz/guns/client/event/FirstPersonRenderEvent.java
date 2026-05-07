@@ -1,24 +1,25 @@
 package com.tacz.guns.client.event;
 
-import cn.sh1rocu.tacz.api.event.RenderHandEvent;
-import cn.sh1rocu.tacz.api.extension.IItem;
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderHandEvent;
 import com.tacz.guns.api.client.animation.statemachine.AnimationStateMachine;
 import com.tacz.guns.api.client.other.KeepingItemRenderer;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
-import com.tacz.guns.compat.iris.IrisCompat;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @Environment(EnvType.CLIENT)
 public class FirstPersonRenderEvent {
     private static AnimationStateMachine<?> lastStateMachine = null;
 
+    @SubscribeEvent
     public static void onRenderHand(RenderHandEvent event) {
         LocalPlayer player = Minecraft.getInstance().player;
         if (player == null) {
@@ -43,7 +44,7 @@ public class FirstPersonRenderEvent {
         }
 
         // 渲染相关内容整理到物品的IClientItemExtensions了，这个接口有待进一步抽象
-        if (stack.getItem() instanceof IItem item && item.getCustomRenderer() instanceof AnimateGeoItemRenderer<?, ?> renderer) {
+        if (BuiltinItemRendererRegistry.INSTANCE.get(stack.getItem()) instanceof AnimateGeoItemRenderer<?, ?> renderer) {
             // 如果旧的状态机已经不再使用且未正常退出，使其静默退出
             AnimationStateMachine<?> machine = renderer.getStateMachine(stack);
             if (machine != lastStateMachine) {
@@ -57,9 +58,6 @@ public class FirstPersonRenderEvent {
             if (flag && renderer.needReInit(stack)) {
                 renderer.tryInit(stack, player, event.getPartialTick());
             }
-
-            // 防止内存泄漏
-            IrisCompat.endBatch(Minecraft.getInstance().renderBuffers().bufferSource());
 
             renderer.renderFirstPerson(player, stack, transformType, event.getPoseStack(), event.getMultiBufferSource(),
                     event.getPackedLight(), event.getPartialTick());

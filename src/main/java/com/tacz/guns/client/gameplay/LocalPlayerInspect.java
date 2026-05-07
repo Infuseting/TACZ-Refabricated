@@ -1,6 +1,5 @@
 package com.tacz.guns.client.gameplay;
 
-import cn.sh1rocu.tacz.api.extension.IItem;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
@@ -9,6 +8,7 @@ import com.tacz.guns.client.resource.index.ClientGunIndex;
 import com.tacz.guns.client.sound.SoundPlayManager;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -26,7 +26,7 @@ public class LocalPlayerInspect {
         ItemStack mainHandItem = player.getMainHandItem();
 
         if (!(mainHandItem.getItem() instanceof IGun iGun)) {
-            if (mainHandItem.getItem() instanceof IItem item && item.getCustomRenderer() instanceof AnimateGeoItemRenderer<?, ?> renderer) {
+            if (BuiltinItemRendererRegistry.INSTANCE.get(mainHandItem.getItem()) instanceof AnimateGeoItemRenderer<?, ?> renderer) {
                 renderer.triggerAnimation(mainHandItem, GunAnimationConstant.INPUT_INSPECT);
             }
             return;

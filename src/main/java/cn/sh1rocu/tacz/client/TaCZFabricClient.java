@@ -1,5 +1,7 @@
 package cn.sh1rocu.tacz.client;
 
+import cn.sh1rocu.simplebedrockmodel.api.event.RenderHandEvent;
+import cn.sh1rocu.simplebedrockmodel.api.event.ViewportEvent;
 import cn.sh1rocu.tacz.api.event.*;
 import cn.sh1rocu.tacz.api.extension.IItem;
 import com.tacz.guns.api.client.event.BeforeRenderHandEvent;
@@ -56,7 +58,7 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         InputEvent.InteractionKeyMappingTriggered.EVENT.register(ClientPreventGunClick::onClickInput);
 
-        RenderHandEvent.CALLBACK.register(FirstPersonRenderEvent::onRenderHand);
+        RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
 
         RenderItemInHandBobEvent.VIEW.register(FirstPersonRenderGunEvent::cancelItemInHandViewBobbing);
         GunFireEvent.CALLBACK.register(FirstPersonRenderGunEvent::onGunFire);
