@@ -10,6 +10,7 @@ import com.tacz.guns.client.model.BedrockAmmoModel;
 import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.client.resource.pojo.TransformScale;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -29,7 +30,7 @@ import java.util.function.Supplier;
 import static net.minecraft.world.item.ItemDisplayContext.GUI;
 
 
-public class AmmoItemRenderer extends BlockEntityWithoutLevelRenderer {
+public class AmmoItemRenderer extends BlockEntityWithoutLevelRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     private static final SlotModel SLOT_AMMO_MODEL = new SlotModel();
 
     public static final Supplier<AmmoItemRenderer> INSTANCE = Suppliers.memoize(() -> {
@@ -62,6 +63,11 @@ public class AmmoItemRenderer extends BlockEntityWithoutLevelRenderer {
             }
         }
         poseStack.translate(0, -1.5, 0);
+    }
+
+    @Override
+    public void render(ItemStack itemStack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int light, int overlay) {
+        renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, light, overlay);
     }
 
     @Override

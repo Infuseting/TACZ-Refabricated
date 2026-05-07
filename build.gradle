@@ -132,6 +132,13 @@ dependencies {
     modCompileOnly 'com.google.code.findbugs:jsr305:3.0.2'
     annotationProcessor 'com.google.code.findbugs:jsr305:3.0.2'
 
+    modImplementation(include("libs:simplebedrockmodel-fabric:2.3.0+mc1.20.1"))
+    implementation("com.maydaymemory:mae:1.1.1") {
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        exclude group: 'it.unimi.dsi', module: 'fastutil'
+        exclude group: 'org.joml', module: 'joml'
+    }
+
     // Apache Commons Math 库，用于进行一些插值运算
     implementation(include('org.apache.commons:commons-math3:3.6.1'))
 

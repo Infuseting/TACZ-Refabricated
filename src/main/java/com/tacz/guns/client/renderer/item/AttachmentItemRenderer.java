@@ -10,6 +10,7 @@ import com.tacz.guns.client.model.BedrockAttachmentModel;
 import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.resource.index.ClientAttachmentIndex;
 import com.tacz.guns.util.RenderDistance;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -26,7 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class AttachmentItemRenderer extends BlockEntityWithoutLevelRenderer {
+public class AttachmentItemRenderer extends BlockEntityWithoutLevelRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     public static final SlotModel SLOT_ATTACHMENT_MODEL = new SlotModel();
 
     public static final Supplier<AttachmentItemRenderer> INSTANCE = Suppliers.memoize(() -> {
@@ -36,6 +37,11 @@ public class AttachmentItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     public AttachmentItemRenderer(BlockEntityRenderDispatcher pBlockEntityRenderDispatcher, EntityModelSet pEntityModelSet) {
         super(pBlockEntityRenderDispatcher, pEntityModelSet);
+    }
+
+    @Override
+    public void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
+        renderByItem(stack, mode, matrices, vertexConsumers, light, overlay);
     }
 
     @Override

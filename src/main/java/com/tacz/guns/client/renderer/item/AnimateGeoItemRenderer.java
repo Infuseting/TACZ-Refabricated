@@ -11,6 +11,7 @@ import com.tacz.guns.client.animation.statemachine.ItemAnimationStateContext;
 import com.tacz.guns.client.model.BedrockAnimatedModel;
 import com.tacz.guns.client.model.bedrock.BedrockPart;
 import com.tacz.guns.util.math.MathUtil;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -37,7 +38,7 @@ import java.util.List;
  * @param <CTX> 动画状态机上下文
  */
 public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX extends ItemAnimationStateContext>
-        extends BlockEntityWithoutLevelRenderer {
+        extends BlockEntityWithoutLevelRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     @Nullable
     protected LuaAnimationStateMachine<CTX> stateMachine;
     protected M model;
@@ -263,6 +264,11 @@ public abstract class AnimateGeoItemRenderer<M extends BedrockAnimatedModel, CTX
             ), light, overlay);
             poseStack.popPose();
         }
+    }
+
+    @Override
+    public void render(ItemStack itemStack, ItemDisplayContext itemDisplayContext, PoseStack poseStack, MultiBufferSource multiBufferSource, int light, int overlay) {
+        renderByItem(itemStack, itemDisplayContext, poseStack, multiBufferSource, light, overlay);
     }
 
     /**

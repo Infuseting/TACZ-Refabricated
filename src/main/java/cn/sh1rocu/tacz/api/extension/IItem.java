@@ -3,6 +3,7 @@ package cn.sh1rocu.tacz.api.extension;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
@@ -18,5 +19,5 @@ public interface IItem {
     }
 
     @Environment(EnvType.CLIENT)
-    BlockEntityWithoutLevelRenderer getCustomRenderer();
+    BuiltinItemRendererRegistry.DynamicItemRenderer getCustomRenderer();
 }

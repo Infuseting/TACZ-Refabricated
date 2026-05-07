@@ -7,6 +7,7 @@ import com.mojang.math.Axis;
 import com.tacz.guns.client.model.SlotModel;
 import com.tacz.guns.client.model.bedrock.BedrockModel;
 import com.tacz.guns.client.renderer.block.GunSmithTableRenderer;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.geom.EntityModelSet;
 import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
@@ -23,7 +24,7 @@ import net.minecraft.world.item.ItemStack;
 import javax.annotation.Nonnull;
 import java.util.function.Supplier;
 
-public class GunSmithTableItemRenderer extends BlockEntityWithoutLevelRenderer {
+public class GunSmithTableItemRenderer extends BlockEntityWithoutLevelRenderer implements BuiltinItemRendererRegistry.DynamicItemRenderer {
     private static final SlotModel SLOT_BLOCK_MODEL = new SlotModel();
 
     public static final Supplier<GunSmithTableItemRenderer> INSTANCE = Suppliers.memoize(() -> {
@@ -33,6 +34,11 @@ public class GunSmithTableItemRenderer extends BlockEntityWithoutLevelRenderer {
 
     public GunSmithTableItemRenderer(BlockEntityRenderDispatcher dispatcher, EntityModelSet modelSet) {
         super(dispatcher, modelSet);
+    }
+
+    @Override
+    public void render(ItemStack stack, ItemDisplayContext mode, PoseStack matrices, MultiBufferSource vertexConsumers, int light, int overlay) {
+        renderByItem(stack, mode, matrices, vertexConsumers, light, overlay);
     }
 
     @Override

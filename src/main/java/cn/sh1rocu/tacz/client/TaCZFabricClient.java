@@ -34,9 +34,7 @@ public class TaCZFabricClient implements ClientModInitializer {
         ModEntitiesRender.registerEntityRenderers();
         ParticleFactories.registerParticles();
         BuiltInRegistries.ITEM.stream().filter(item -> item instanceof IItem).forEach(clientEx ->
-                BuiltinItemRendererRegistry.INSTANCE.register(clientEx,
-                        (stack, mode, matrices, vertexConsumers, light, overlay) ->
-                                ((IItem) clientEx).getCustomRenderer().renderByItem(stack, mode, matrices, vertexConsumers, light, overlay)));
+                BuiltinItemRendererRegistry.INSTANCE.register(clientEx, ((IItem) clientEx).getCustomRenderer()));
         subscribeEvents();
     }
 

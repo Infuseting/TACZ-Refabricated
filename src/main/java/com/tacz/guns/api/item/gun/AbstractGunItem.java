@@ -21,7 +21,7 @@ import com.tacz.guns.util.AllowAttachmentTagMatcher;
 import com.tacz.guns.util.AttachmentDataUtils;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.renderer.BlockEntityWithoutLevelRenderer;
+import net.fabricmc.fabric.api.client.rendering.v1.BuiltinItemRendererRegistry;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -370,7 +370,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     @Override
     @Environment(EnvType.CLIENT)
-    public BlockEntityWithoutLevelRenderer getCustomRenderer() {
+    public BuiltinItemRendererRegistry.DynamicItemRenderer getCustomRenderer() {
         return GunItemRendererWrapper.INSTANCE.get();
     }
 
