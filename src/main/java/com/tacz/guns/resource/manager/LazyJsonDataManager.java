@@ -6,6 +6,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.util.ResourceScanner;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -21,6 +22,7 @@ import org.slf4j.MarkerFactory;
 import java.io.IOException;
 import java.io.Reader;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -32,7 +34,7 @@ import java.util.function.Supplier;
  *
  * @param <T> 数据类型
  */
-public class LazyJsonDataManager<T> extends SimplePreparableReloadListener<LazyJsonDataManager.PreparedResult<T>> {
+public class LazyJsonDataManager<T> extends SimplePreparableReloadListener<LazyJsonDataManager.PreparedResult<T>> implements IdentifiableResourceReloadListener {
 
     protected final Map<ResourceLocation, T> dataMap = Maps.newHashMap();
     protected final Map<ResourceLocation, Supplier<LoadResult<T>>> lazyLoaderMap = Maps.newHashMap();
@@ -57,6 +59,7 @@ public class LazyJsonDataManager<T> extends SimplePreparableReloadListener<LazyJ
         this.gson = pGson;
         this.dataClass = dataClass;
         this.marker = MarkerFactory.getMarker(marker);
+        this.ID = new ResourceLocation(GunMod.MOD_ID, marker.toLowerCase(Locale.ROOT));
         this.fileToIdConverter = fileToIdConverter;
         this.eagerLoadPredicate = eagerLoadPredicate;
     }
@@ -211,6 +214,13 @@ public class LazyJsonDataManager<T> extends SimplePreparableReloadListener<LazyJ
 
     protected final FileToIdConverter getFileToIdConverter() {
         return fileToIdConverter;
+    }
+
+    public final ResourceLocation ID;
+
+    @Override
+    public ResourceLocation getFabricId() {
+        return ID;
     }
 
     protected record LoadResult<T>(@Nullable T data, boolean failed) {
