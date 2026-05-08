@@ -1,5 +1,6 @@
 package com.tacz.guns.resource;
 
+import cn.sh1rocu.tacz.TaCZFabric;
 import cn.sh1rocu.tacz.api.event.AddReloadListenerEvent;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -26,6 +27,7 @@ import com.tacz.guns.resource.pojo.data.block.TabConfig;
 import com.tacz.guns.resource.pojo.data.gun.ExtraDamage;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.resource.pojo.data.gun.Ignite;
+import com.tacz.guns.resource.pojo.data.loot.LootTableInjection;
 import com.tacz.guns.resource.serialize.*;
 import com.tacz.guns.util.AllowAttachmentTagMatcher;
 import net.minecraft.core.RegistryAccess;
@@ -71,6 +73,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     private CommonDataManager<CommonAttachmentIndex> attachmentIndex;
     private CommonDataManager<CommonBlockIndex> blockIndex;
     private RecipeFilterManager recipeFilterManager;
+    private LootInjectionManager lootInjectionManager;
 
     private AttachmentsTagManager attachmentsTagManager;
     List<LuaLibrary> libList = List.of(new LuaGunLogicConstant());
@@ -82,6 +85,8 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         attachmentData = register(new AttachmentDataManager());
         attachmentsTagManager = register(new AttachmentsTagManager());
         recipeFilterManager = register(new RecipeFilterManager());
+        lootInjectionManager = new LootInjectionManager();
+        register.accept(lootInjectionManager);
         blockData = register(new CommonDataManager<>(DataType.BLOCK_DATA, BlockData.class, GSON, "data/blocks", "BlockDataLoader"));
         register.accept(scriptManager);
 
@@ -133,6 +138,13 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     @Nullable
     public RecipeFilter getRecipeFilter(ResourceLocation id) {
         return recipeFilterManager.getFilter(id);
+    }
+
+    public List<LootTableInjection> getLootTableInjections(ResourceLocation lootTable) {
+        if (lootInjectionManager == null) {
+            return List.of();
+        }
+        return lootInjectionManager.getInjections(lootTable);
     }
 
     @Nullable
@@ -206,6 +218,10 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         return INSTANCE;
     }
 
+    public static void clearInstance() {
+        INSTANCE = null;
+    }
+
     /**
      * 根据当前环境选择合适的缓存<br/>
      * 当前环境为单人游戏或多人游戏的服务端时，返回CommonAssetsManger实例<br/>
@@ -242,7 +258,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     }
 
     public static void onServerStopped(MinecraftServer server) {
-        INSTANCE = null;
+        clearInstance();
     }
 
     public static void OnDatapackSync(ServerPlayer player, boolean joined) {
@@ -254,7 +270,8 @@ public class CommonAssetsManager implements ICommonResourceProvider {
 
     }
 
-    public static void reloadAllPack(MinecraftServer server) {
+    public static void reloadAllPack() {
+        var server = TaCZFabric.getServer();
         if (server == null) {
             return;
         }

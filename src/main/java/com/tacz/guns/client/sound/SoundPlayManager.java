@@ -46,19 +46,6 @@ public class SoundPlayManager {
         return playClientSound(entity, name, volume, pitch, distance, false);
     }
 
-    public static void preloadSound(@Nullable ResourceLocation soundId) {
-        ClientAssetsManager.INSTANCE.preloadSoundBuffers(soundId);
-    }
-
-    public static void preloadGunSounds(@Nullable GunDisplayInstance display) {
-        if (display == null) {
-            return;
-        }
-        for (ResourceLocation soundId : display.getPreloadSounds()) {
-            preloadSound(soundId);
-        }
-    }
-
     public static void stopPlayGunSound() {
         if (tmpSoundInstance != null) {
             tmpSoundInstance.setStop();

@@ -2,6 +2,7 @@ package com.tacz.guns.network.message;
 
 import com.tacz.guns.GunMod;
 import com.tacz.guns.client.resource.ClientIndexManager;
+import com.tacz.guns.resource.CommonAssetsManager;
 import com.tacz.guns.resource.network.CommonNetworkCache;
 import com.tacz.guns.resource.network.DataType;
 import net.fabricmc.api.EnvType;
@@ -42,7 +43,8 @@ public class ServerMessageSyncGunPack implements FabricPacket {
 
     @Environment(EnvType.CLIENT)
     public void handle(LocalPlayer player, PacketSender responseSender) {
-        doSync(this);
+        boolean remoteConnection = player.connection.getConnection() != null && !player.connection.getConnection().isMemoryConnection();
+        doSync(this, remoteConnection);
     }
 
 
@@ -51,7 +53,10 @@ public class ServerMessageSyncGunPack implements FabricPacket {
     }
 
     @Environment(EnvType.CLIENT)
-    private static void doSync(ServerMessageSyncGunPack message) {
+    private static void doSync(ServerMessageSyncGunPack message, boolean remoteConnection) {
+        if (remoteConnection) {
+            CommonAssetsManager.clearInstance();
+        }
         CommonNetworkCache.INSTANCE.fromNetwork(message.cache);
         // 通知客户端重新构建ClientIndex
         ClientIndexManager.reload();

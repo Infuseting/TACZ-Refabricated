@@ -27,7 +27,7 @@ public class ReloadCommand {
         StopWatch watch = StopWatch.createStarted();
         {
             if (FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT) ReloadCommand.reloadClient();
-            CommonAssetsManager.reloadAllPack(context.getSource().getServer());
+            CommonAssetsManager.reloadAllPack();
         }
         watch.stop();
         double time = watch.getTime(TimeUnit.MICROSECONDS) / 1000.0;

@@ -1,8 +1,8 @@
 package com.tacz.guns.client.resource;
 
+import cn.sh1rocu.tacz.TaCZFabric;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.mojang.blaze3d.audio.SoundBuffer;
 import com.tacz.guns.GunMod;
 import com.tacz.guns.api.client.animation.gltf.AnimationStructure;
 import com.tacz.guns.api.vmlib.LuaAnimationConstant;
@@ -11,7 +11,6 @@ import com.tacz.guns.api.vmlib.LuaLibrary;
 import com.tacz.guns.client.resource.manager.DisplayManager;
 import com.tacz.guns.client.resource.manager.GltfManager;
 import com.tacz.guns.client.resource.manager.PackInfoManager;
-import com.tacz.guns.client.resource.manager.SoundAssetsManager;
 import com.tacz.guns.client.resource.pojo.CommonTransformObject;
 import com.tacz.guns.client.resource.pojo.PackInfo;
 import com.tacz.guns.client.resource.pojo.animation.bedrock.AnimationKeyframes;
@@ -38,6 +37,8 @@ import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
@@ -47,6 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
 /**
@@ -85,7 +88,6 @@ public enum ClientAssetsManager {
     private final List<LuaLibrary> libList = List.of(new LuaAnimationConstant(), new LuaGunAnimationConstant());
     private ScriptManager scriptManager;
     // 音效
-    private SoundAssetsManager soundAssetsManager;
     // 枪包元数据
     private PackInfoManager packInfo;
 
@@ -105,8 +107,20 @@ public enum ClientAssetsManager {
                     "BedrockAnimationLoader", id -> GunMod.MOD_ID.equals(id.getNamespace())));
             gltfAnimation = register(new GltfManager());
             scriptManager = register(new ScriptManager(new FileToIdConverter("scripts", ".lua"), libList));
-            soundAssetsManager = register(new SoundAssetsManager());
             packInfo = register(new PackInfoManager());
+            register(new IdentifiableResourceReloadListener() {
+                static final ResourceLocation ID = new ResourceLocation(GunMod.MOD_ID, "client_index_manager_reload");
+
+                @Override
+                public ResourceLocation getFabricId() {
+                    return ID;
+                }
+
+                @Override
+                public CompletableFuture<Void> reload(PreparationBarrier barrier, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+                    return barrier.wait(Void.TYPE).thenRunAsync(ClientIndexManager::reload, gameExecutor);
+                }
+            });
         }
         listeners.forEach(register);
     }
@@ -165,23 +179,6 @@ public enum ClientAssetsManager {
     }
 
     @Nullable
-    public SoundBuffer getSoundBuffer(@Nullable ResourceLocation id, boolean mono) {
-        return soundAssetsManager.getBuffer(id, mono);
-    }
-
-    public void preloadSoundBuffers(@Nullable ResourceLocation id) {
-        if (id != null) {
-            soundAssetsManager.preload(id);
-        }
-    }
-
-    public void invalidateSoundBuffers() {
-        if (soundAssetsManager != null) {
-            soundAssetsManager.invalidateForSoundEngineReload();
-        }
-    }
-
-    @Nullable
     public PackInfo getPackInfo(String namespace) {
         return packInfo.getData(namespace);
     }
@@ -198,13 +195,9 @@ public enum ClientAssetsManager {
     public static void reloadAllPack() {
         try {
             Minecraft.getInstance().reloadResourcePacks().get();
-            // 如果连接到多人游戏
-            if (Minecraft.getInstance().getSingleplayerServer() == null) {
-                // 重建索引
-                ClientIndexManager.reload();
-            } else {
+            if (TaCZFabric.getServer() != null) {
                 // 直接刷新data
-                CommonAssetsManager.reloadAllPack(Minecraft.getInstance().getSingleplayerServer());
+                CommonAssetsManager.reloadAllPack();
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
