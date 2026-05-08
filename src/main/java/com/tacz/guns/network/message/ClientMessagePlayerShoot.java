@@ -16,18 +16,25 @@ public class ClientMessagePlayerShoot implements FabricPacket {
      * 这里的 timestamp 应该是基于 base timestamp 的相对值
      */
     private final long timestamp;
+    private float chargeProgress;
 
     public ClientMessagePlayerShoot(long timestamp) {
+        this(timestamp, 0f);
+    }
+
+    public ClientMessagePlayerShoot(long timestamp, float chargeProgress) {
         this.timestamp = timestamp;
+        this.chargeProgress = chargeProgress;
     }
 
     public ClientMessagePlayerShoot(FriendlyByteBuf buf) {
-        this(buf.readLong());
+        this(buf.readLong(), buf.readFloat());
     }
 
     @Override
     public void write(FriendlyByteBuf buf) {
         buf.writeLong(timestamp);
+        buf.writeFloat(chargeProgress);
     }
 
     @Override
@@ -36,6 +43,6 @@ public class ClientMessagePlayerShoot implements FabricPacket {
     }
 
     public void handle(ServerPlayer player, PacketSender responseSender) {
-        IGunOperator.fromLivingEntity(player).shoot(player::getXRot, player::getYRot, timestamp);
+        IGunOperator.fromLivingEntity(player).shoot(player::getXRot, player::getYRot, timestamp, chargeProgress);
     }
 }

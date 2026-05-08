@@ -146,6 +146,7 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
     private ResourceLocation gunDisplayId = DefaultAssets.DEFAULT_GUN_DISPLAY_ID;
     private float armorIgnore;
     private float headShot;
+    private float shotDamageMultiplier = 1f;
 
     public EntityKineticBullet(EntityType<? extends Projectile> type, Level worldIn) {
         super(type, worldIn);
@@ -227,6 +228,11 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
         if (bulletCount > 1) {
             this.damageModifier = 1f / bulletCount;
         }
+    }
+
+    @ApiStatus.Internal
+    public void setShotDamageMultiplier(float multiplier) {
+        this.shotDamageMultiplier = Math.max(multiplier, 0f);
     }
 
     @Override
@@ -527,7 +533,8 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
             }
         }
         // 让脚本修改枪械伤害
-        return modifyProperty(GunProperties.DAMAGE, Float.class, base);
+        float modifiedDamage = modifyProperty(GunProperties.DAMAGE, Float.class, base);
+        return Math.max(modifiedDamage * this.shotDamageMultiplier, 0F);
     }
 
     /**
