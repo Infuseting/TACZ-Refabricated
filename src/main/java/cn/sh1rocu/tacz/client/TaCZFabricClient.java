@@ -117,7 +117,6 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         ClientTickEvents.START_CLIENT_TICK.register(mc -> ShootKey.autoShoot(mc, false));
         ClientTickEvents.END_CLIENT_TICK.register(mc -> ShootKey.autoShoot(mc, true));
-        InputEvent.MouseButton.Post.EVENT.register(ShootKey::semiShoot);
 
         InputEvent.Key.EVENT.register(ZoomKey::onZoomKeyPress);
         InputEvent.MouseButton.Post.EVENT.register(ZoomKey::onZoomMousePress);
