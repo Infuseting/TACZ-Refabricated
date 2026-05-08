@@ -62,7 +62,7 @@ public class TaCZFabricClient implements ClientModInitializer {
 
         ClientPlayConnectionEvents.DISCONNECT.register(CommonNetworkCacheEvent::onClientPlayerLoggingIn);
 
-        RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
+        // RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
 
         RenderItemInHandBobEvent.VIEW.register(FirstPersonRenderGunEvent::cancelItemInHandViewBobbing);
         GunFireEvent.CALLBACK.register(FirstPersonRenderGunEvent::onGunFire);
