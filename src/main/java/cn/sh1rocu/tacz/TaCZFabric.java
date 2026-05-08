@@ -15,7 +15,6 @@ import com.tacz.guns.init.CapabilityRegistry;
 import com.tacz.guns.init.CommandRegistry;
 import com.tacz.guns.init.CommonRegistry;
 import com.tacz.guns.init.CompatRegistry;
-import com.tacz.guns.loot.LootTableInjectorModifier;
 import com.tacz.guns.resource.CommonAssetsManager;
 import fuzs.forgeconfigapiport.api.config.v2.ForgeConfigRegistry;
 import fuzs.forgeconfigapiport.api.config.v2.ModConfigEvents;
@@ -74,8 +73,6 @@ public class TaCZFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> TaCZFabric.server = new WeakReference<>(server));
 
         subscribeEvents();
-
-        LootTableInjectorModifier.init();
     }
 
     private void subscribeEvents() {
