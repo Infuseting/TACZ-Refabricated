@@ -2,7 +2,6 @@ package cn.sh1rocu.tacz.mixin.client;
 
 import cn.sh1rocu.tacz.api.event.AddPackFindersEvent;
 import cn.sh1rocu.tacz.api.event.InputEvent;
-import cn.sh1rocu.tacz.api.event.RenderTickEvent;
 import cn.sh1rocu.tacz.api.mixin.PackRepositoryExtension;
 import cn.sh1rocu.tacz.util.forge.ClientHooks;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
@@ -69,18 +68,6 @@ public abstract class MinecraftMixin {
     private void tacz$addPacks(GameConfig gameConfig, CallbackInfo ci) {
         AddPackFindersEvent event = new AddPackFindersEvent(PackType.CLIENT_RESOURCES, ((PackRepositoryExtension) this.getResourcePackRepository())::tacz$addPackFinder, false);
         AddPackFindersEvent.CALLBACK.invoker().onAddPackFinders(event);
-    }
-
-    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V", ordinal = 0, shift = At.Shift.BEFORE))
-    private void tacz$renderTickStart(boolean tick, CallbackInfo ci) {
-        float realPartialTick = this.pause ? this.pausePartialTick : this.timer.partialTick;
-        RenderTickEvent.CALLBACK.invoker().post(new RenderTickEvent((Minecraft) (Object) this, RenderTickEvent.Phase.START, realPartialTick));
-    }
-
-    @Inject(method = "runTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;pop()V", ordinal = 4, shift = At.Shift.AFTER))
-    private void tacz$renderTickEnd(boolean tick, CallbackInfo ci) {
-        float realPartialTick = this.pause ? this.pausePartialTick : this.timer.partialTick;
-        RenderTickEvent.CALLBACK.invoker().post(new RenderTickEvent((Minecraft) (Object) this, RenderTickEvent.Phase.END, realPartialTick));
     }
 
     @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/renderer/GameRenderer;resetData()V"))
