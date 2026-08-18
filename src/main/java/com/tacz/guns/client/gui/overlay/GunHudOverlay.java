@@ -136,9 +136,7 @@ public class GunHudOverlay {
         poseStack.popPose();
 
         // 模组版本信息
-        String minecraftVersion = SharedConstants.getCurrentVersion().getName();
-        String modVersion = FabricLoader.getInstance().getModContainer(GunMod.MOD_ID).orElseThrow().getMetadata().getVersion().getFriendlyString();
-        String debugInfo = String.format("%s-%s", minecraftVersion, modVersion);
+        String debugInfo = String.format("Fork By Infuseting");
         // 文本
         poseStack.pushPose();
         poseStack.scale(0.5f, 0.5f, 1);
