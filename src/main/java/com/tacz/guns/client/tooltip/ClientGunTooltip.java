@@ -128,33 +128,60 @@ public class ClientGunTooltip implements ClientTooltipComponent {
 
 
         if (shouldShow(GunTooltipPart.AMMO_INFO)) {
-            this.ammoName = ammo.getHoverName();
-            this.maxWidth = Math.max(font.width(this.ammoName) + 22, this.maxWidth);
+            fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(gun);
+            ResourceLocation gunId = iGun.getGunId(gun);
+            String familyId = fr.infuseting.tacz.magazine.MagazineFamilySystem.getFamilyForGun(gunId);
 
-            int barrelBulletAmount = (iGun.hasBulletInBarrel(gun) && gunIndex.getGunData().getBolt() != Bolt.OPEN_BOLT) ? 1 : 0;
-            int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gun, gunIndex.getGunData()) + barrelBulletAmount;
-            int currentAmmoCount = iGun.getCurrentAmmoCount(this.gun) + barrelBulletAmount;
+            if (gunIndex.getGunData().getReloadData().getType() == com.tacz.guns.resource.pojo.data.gun.FeedType.MAGAZINE && familyId != null) {
+                fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gun);
+                ItemStack stored = cap.hasMagazine() ? cap.getStoredMagazine() : ItemStack.EMPTY;
+                ItemStack magStack = stored.isEmpty()
+                        ? fr.infuseting.tacz.item.MagazineItem.createMagazineByFamily(fr.infuseting.tacz.item.MagazineRegistrar.MAGAZINE.get(), familyId, 0)
+                        : stored;
 
-            if (!iGun.useDummyAmmo(gun)) {
-                if (display != null && display.getAmmoCountStyle() == AmmoCountStyle.PERCENT) {
-                    this.ammoCountText = Component.literal(CURRENT_AMMO_FORMAT_PERCENT.format((float) currentAmmoCount / (maxAmmoCount == 0 ? 1f : maxAmmoCount)));
+                this.ammoName = magStack.getHoverName();
+                this.maxWidth = Math.max(font.width(this.ammoName) + 22, this.maxWidth);
+
+                int current = iGun.getCurrentAmmoCount(gun);
+                int max = AttachmentDataUtils.getAmmoCountWithAttachment(gun, gunIndex.getGunData());
+                if (stored.isEmpty()) {
+                    boolean chambered = iGun.hasBulletInBarrel(gun);
+                    this.ammoCountText = chambered ? Component.literal("1/0 (Chambré)") : Component.literal("0/0");
+                } else if (fr.infuseting.tacz.item.MagazineItem.isGunMagChecked(stored, current)) {
+                    this.ammoCountText = Component.literal(current + "/" + max);
                 } else {
-                    this.ammoCountText = Component.literal("%d/%d".formatted(currentAmmoCount, maxAmmoCount));
+                    this.ammoCountText = Component.literal("?/" + max);
                 }
+                this.maxWidth = Math.max(font.width(this.ammoCountText) + 22, this.maxWidth);
             } else {
-                int dummyAmmoAmount = iGun.getDummyAmmoAmount(gun);
-                if (display != null && display.getAmmoCountStyle() == AmmoCountStyle.PERCENT) {
-                    String p = CURRENT_AMMO_FORMAT_PERCENT.format((float) currentAmmoCount / (maxAmmoCount == 0 ? 1f : maxAmmoCount));
-                    this.ammoCountText = Component.literal("%s (%d)".formatted(p, dummyAmmoAmount));
-                } else {
-                    this.ammoCountText = Component.literal("%d/%d (%d)".formatted(currentAmmoCount, maxAmmoCount, dummyAmmoAmount));
-                }
+                this.ammoName = ammo.getHoverName();
+                this.maxWidth = Math.max(font.width(this.ammoName) + 22, this.maxWidth);
 
+                int barrelBulletAmount = (iGun.hasBulletInBarrel(gun) && gunIndex.getGunData().getBolt() != Bolt.OPEN_BOLT) ? 1 : 0;
+                int maxAmmoCount = AttachmentDataUtils.getAmmoCountWithAttachment(gun, gunIndex.getGunData()) + barrelBulletAmount;
+                int currentAmmoCount = iGun.getCurrentAmmoCount(this.gun) + barrelBulletAmount;
+
+                if (!iGun.useDummyAmmo(gun)) {
+                    if (display != null && display.getAmmoCountStyle() == AmmoCountStyle.PERCENT) {
+                        this.ammoCountText = Component.literal(CURRENT_AMMO_FORMAT_PERCENT.format((float) currentAmmoCount / (maxAmmoCount == 0 ? 1f : maxAmmoCount)));
+                    } else {
+                        this.ammoCountText = Component.literal("%d/%d".formatted(currentAmmoCount, maxAmmoCount));
+                    }
+                } else {
+                    int dummyAmmoAmount = iGun.getDummyAmmoAmount(gun);
+                    if (display != null && display.getAmmoCountStyle() == AmmoCountStyle.PERCENT) {
+                        String p = CURRENT_AMMO_FORMAT_PERCENT.format((float) currentAmmoCount / (maxAmmoCount == 0 ? 1f : maxAmmoCount));
+                        this.ammoCountText = Component.literal("%s (%d)".formatted(p, dummyAmmoAmount));
+                    } else {
+                        this.ammoCountText = Component.literal("%d/%d (%d)".formatted(currentAmmoCount, maxAmmoCount, dummyAmmoAmount));
+                    }
+
+                }
+                if (iGun.useInventoryAmmo(gun)) {
+                    this.ammoCountText = Component.translatable("tooltip.tacz.gun.inventory_mode").withStyle(ChatFormatting.YELLOW);
+                }
+                this.maxWidth = Math.max(font.width(this.ammoCountText) + 22, this.maxWidth);
             }
-            if (iGun.useInventoryAmmo(gun)) {
-                this.ammoCountText = Component.translatable("tooltip.tacz.gun.inventory_mode").withStyle(ChatFormatting.YELLOW);
-            }
-            this.maxWidth = Math.max(font.width(this.ammoCountText) + 22, this.maxWidth);
         }
 
 

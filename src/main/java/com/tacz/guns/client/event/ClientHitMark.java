@@ -33,13 +33,6 @@ public class ClientHitMark {
         if (player != null && player.equals(attacker) && hurtEntity != null) {
             ResourceLocation gunId = event.getGunId();
             ResourceLocation gunDisplayId = event.getGunDisplayId();
-            RenderCrosshairEvent.markHitTimestamp();
-            if (event.isHeadShot()) {
-                RenderCrosshairEvent.markHeadShotTimestamp();
-                TimelessAPI.getGunDisplay(gunDisplayId, gunId).ifPresent(index -> SoundPlayManager.playHeadHitSound(player, index));
-            } else {
-                TimelessAPI.getGunDisplay(gunDisplayId, gunId).ifPresent(index -> SoundPlayManager.playFleshHitSound(player, index));
-            }
 
             if (hurtEntity instanceof TargetMinecart) {
                 if (System.currentTimeMillis() - lastHitTimestamp < RenderConfig.DAMAGE_COUNTER_RESET_TIME.get()) {
@@ -56,19 +49,6 @@ public class ClientHitMark {
     }
 
     public static void onEntityKill(EntityKillByGunEvent event) {
-        LogicalSide logicalSide = event.getLogicalSide();
-        if (logicalSide != LogicalSide.CLIENT) {
-            return;
-        }
-        LivingEntity attacker = event.getAttacker();
-        LocalPlayer player = Minecraft.getInstance().player;
-        if (player != null && player.equals(attacker)) {
-            RenderCrosshairEvent.markKillTimestamp();
-            KillAmountOverlay.markTimestamp();
-            TimelessAPI.getGunDisplay(event.getGunDisplayId(), event.getGunId()).ifPresent(index -> SoundPlayManager.playKillSound(player, index));
-            if (event.isHeadShot()) {
-                RenderCrosshairEvent.markHeadShotTimestamp();
-            }
-        }
+        // Kill sound disabled
     }
 }

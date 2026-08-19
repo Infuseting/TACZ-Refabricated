@@ -11,6 +11,7 @@ import com.tacz.guns.client.resource.index.ClientBlockIndex;
 import com.tacz.guns.client.resource.index.ClientGunIndex;
 import com.tacz.guns.crafting.GunSmithTableRecipe;
 import com.tacz.guns.resource.CommonAssetsManager;
+import com.tacz.guns.resource.pojo.data.ammo.AmmoData;
 import com.tacz.guns.resource.index.CommonAmmoIndex;
 import com.tacz.guns.resource.index.CommonAttachmentIndex;
 import com.tacz.guns.resource.index.CommonBlockIndex;
@@ -105,6 +106,10 @@ public final class TimelessAPI {
 
     public static Optional<CommonAmmoIndex> getCommonAmmoIndex(ResourceLocation ammoId) {
         return Optional.ofNullable(CommonAssetsManager.get().getAmmoIndex(ammoId));
+    }
+
+    public static Optional<AmmoData> getCommonAmmoData(ResourceLocation ammoId) {
+        return Optional.ofNullable(CommonAssetsManager.get().getAmmoData(ammoId));
     }
 
     /**

@@ -72,6 +72,8 @@ public class TaCZFabric implements ModInitializer {
         }
         ServerLifecycleEvents.SERVER_STARTING.register((server) -> TaCZFabric.server = new WeakReference<>(server));
 
+        new fr.infuseting.tacz.TaCZMagazines().onInitialize();
+
         subscribeEvents();
     }
 

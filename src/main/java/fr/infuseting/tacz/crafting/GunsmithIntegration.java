@@ -1,0 +1,199 @@
+package fr.infuseting.tacz.crafting;
+
+import fr.infuseting.tacz.TaCZMagazines;
+import fr.infuseting.tacz.item.MagazineItem;
+import fr.infuseting.tacz.item.MagazineRegistrar;
+import fr.infuseting.tacz.magazine.MagazineFamilySystem;
+import com.tacz.guns.api.TimelessAPI;
+import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.crafting.GunSmithTableIngredient;
+import com.tacz.guns.crafting.GunSmithTableRecipe;
+import com.tacz.guns.crafting.result.GunSmithTableResult;
+import com.tacz.guns.resource.pojo.data.block.BlockData;
+import com.tacz.guns.resource.pojo.data.block.TabConfig;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
+
+import java.lang.reflect.Field;
+import java.util.*;
+
+// Injects a "Magazines" tab and corresponding recipes into TaCZ's gun_smith_table at runtime, after magazine families are discovered each datapack reload.
+
+public class GunsmithIntegration {
+
+    static final ResourceLocation BLOCK_ID = new ResourceLocation("tacz", "ammo_workbench");
+    static final ResourceLocation TAB_ID   = new ResourceLocation("tacz", "magazines");
+
+    // -------------------------------------------------------------------------
+
+    public static void setup(MinecraftServer server) {
+        if (server == null) return;
+        injectTab();
+        injectRecipes(server.getRecipeManager(), buildGunTypeMap(server.getRecipeManager()));
+    }
+
+    // Called client-side on RecipesUpdatedEvent so the workbench tab appears when
+    // connecting to a dedicated server (setup() only runs server-side in that case).
+    public static void injectTabClientSide() {
+        injectTab();
+    }
+
+    // -------------------------------------------------------------------------
+    // Tab injection
+    // -------------------------------------------------------------------------
+
+    // Injects our tab into the gun_smith_table's BlockData.
+    private static void injectTab() {
+        TimelessAPI.getCommonBlockIndex(BLOCK_ID).ifPresent(blockIndex -> {
+            BlockData data = blockIndex.getData();
+            if (data == null) {
+                TaCZMagazines.LOGGER.warn("[GunsmithIntegration] BlockData for {} is null â€” skipping tab injection", BLOCK_ID);
+                return;
+            }
+
+            try {
+                Field tabsField = BlockData.class.getDeclaredField("tabs");
+                tabsField.setAccessible(true);
+
+                @SuppressWarnings("unchecked")
+                List<TabConfig> current = (List<TabConfig>) tabsField.get(data);
+                List<TabConfig> mutable = new ArrayList<>(current != null ? current : Collections.emptyList());
+
+                // Remove stale entry from previous reload so we don't accumulate duplicates
+                mutable.removeIf(t -> TAB_ID.equals(t.id()));
+
+                ItemStack icon = buildTabIcon();
+                mutable.add(new TabConfig(TAB_ID, "taczmagazines.tab.magazines", icon));
+
+                tabsField.set(data, mutable);
+                TaCZMagazines.LOGGER.info("[GunsmithIntegration] Injected '{}' tab into {}", TAB_ID, BLOCK_ID);
+
+            } catch (NoSuchFieldException | IllegalAccessException e) {
+                TaCZMagazines.LOGGER.error("[GunsmithIntegration] Could not inject tab: {}", e.getMessage());
+            }
+        });
+    }
+
+    // Builds the tab icon from the first available magazine family.
+    private static ItemStack buildTabIcon() {
+        for (String fid : MagazineFamilySystem.getAllFamilies()) {
+            if (!MagazineFamilySystem.isExtendedFamily(fid)) {
+                return MagazineItem.createMagazineByFamily(MagazineRegistrar.MAGAZINE.get(), fid, 0);
+            }
+        }
+        return new ItemStack(MagazineRegistrar.MAGAZINE.get());
+    }
+
+    // -------------------------------------------------------------------------
+    // Gun-type lookup
+    // -----------------------------------------        --------------------------------
+
+    // Scans existing GunSmithTableRecipes in the RecipeManager and maps each gun's ResourceLocation â†’ the tab it belongs to (tacz:pistol, tacz:rifle, etc.).
+    private static Map<ResourceLocation, ResourceLocation> buildGunTypeMap(RecipeManager rm) {
+        Map<ResourceLocation, ResourceLocation> map = new HashMap<>();
+        for (Recipe<?> recipe : rm.getRecipes()) {
+            if (!(recipe instanceof GunSmithTableRecipe gsr)) continue;
+            ItemStack output = gsr.getOutput();
+            if (output != null && !output.isEmpty() && output.getItem() instanceof IGun iGun) {
+                ResourceLocation gunId = iGun.getGunId(output);
+                if (gunId != null) {
+                    map.put(gunId, gsr.getTab());
+                }
+            }
+        }
+        TaCZMagazines.LOGGER.debug("[GunsmithIntegration] Built gun-type map with {} entries", map.size());
+        return map;
+    }
+
+    // Returns the number of iron ingots required based on the gun's tab type
+    private static int ingredientCount(ResourceLocation tab) {
+        if (tab == null) return 5;
+        return switch (tab.getPath()) {
+            case "pistol" -> 4;
+            case "smg"    -> 5;
+            case "rifle"  -> 6;
+            case "sniper" -> 7;
+            case "mg"     -> 8;
+            default       -> 5;
+        };
+    }
+
+    // -------------------------------------------------------------------------
+    // Recipe injection
+    // -------------------------------------------------------------------------
+
+    private static void injectRecipes(RecipeManager rm, Map<ResourceLocation, ResourceLocation> gunTypeMap) {
+        // Collect all existing recipes, removing any previous injections (reload safety)
+        List<Recipe<?>> allRecipes = new ArrayList<>(rm.getRecipes());
+        allRecipes.removeIf(r ->
+                "tacz".equals(r.getId().getNamespace())
+                        && r.getId().getPath().startsWith("magazine/"));
+
+        List<String> orderedFamilies = MagazineFamilySystem.getFamiliesInCreativeTabOrder();
+        orderedFamilies.forEach(f -> TaCZMagazines.LOGGER.info("[GunsmithIntegration] Order: {}", f));
+
+        int added = 0;
+        for (String familyId : orderedFamilies) {
+            MagazineRecipeOverrides.RecipeOverride recipeOverride = MagazineRecipeOverrides.get(familyId);
+            if (recipeOverride != null && !recipeOverride.enabled()) {
+                continue;
+            }
+
+            List<GunSmithTableIngredient> inputs;
+            if (recipeOverride != null) {
+                inputs = recipeOverride.ingredients();
+            } else {
+                int count = resolveIngredientCount(familyId, gunTypeMap);
+                if (MagazineFamilySystem.isExtendedFamily(familyId)) {
+                    count += MagazineFamilySystem.getExtLevelForFamily(familyId) * 2;
+                }
+                inputs = List.of(new GunSmithTableIngredient(Ingredient.of(Items.IRON_INGOT), count));
+            }
+
+            ItemStack resultStack = MagazineItem.createMagazineByFamily(
+                    MagazineRegistrar.MAGAZINE.get(), familyId, 0);
+
+            GunSmithTableResult result = new GunSmithTableResult(resultStack, TAB_ID);
+
+            // Zero-padded index prefix ensures lexicographic order == intended display order
+            int sortIndex = orderedFamilies.indexOf(familyId);
+            ResourceLocation recipeId = new ResourceLocation("tacz",
+                    String.format("magazine/%04d_%s", sortIndex, familyId));
+            GunSmithTableRecipe recipe = new GunSmithTableRecipe(recipeId, result, inputs);
+            recipe.init();
+
+            allRecipes.add(recipe);
+            added++;
+        }
+
+        rm.replaceRecipes(allRecipes);
+        allRecipes.stream()
+                .filter(r -> r.getId().getNamespace().equals("tacz"))
+                .forEach(r -> TaCZMagazines.LOGGER.info("[GunsmithIntegration] Registered recipe ID: {}", r.getId()));
+        TaCZMagazines.LOGGER.info("[GunsmithIntegration] Injected {} magazine recipes into RecipeManager", added);
+    }
+
+    // Determines the ingredient count for a family:
+    private static int resolveIngredientCount(String familyId,
+                                               Map<ResourceLocation, ResourceLocation> gunTypeMap) {
+        ResourceLocation repGun = MagazineFamilySystem.getRepresentativeGun(familyId);
+        if (repGun != null) {
+            ResourceLocation tab = gunTypeMap.get(repGun);
+            if (tab != null) return ingredientCount(tab);
+        }
+
+        // Fallback: scan all compatible guns and use the first match found
+        for (ResourceLocation gunId : MagazineFamilySystem.getCompatibleGuns(familyId)) {
+            ResourceLocation tab = gunTypeMap.get(gunId);
+            if (tab != null) return ingredientCount(tab);
+        }
+
+        return 5; // safe default
+    }
+}
+

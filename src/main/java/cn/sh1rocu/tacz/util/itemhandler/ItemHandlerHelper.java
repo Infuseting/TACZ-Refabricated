@@ -96,6 +96,55 @@ public class ItemHandlerHelper {
         }
     }
 
+    public static @NotNull ItemStack insertItemStackedFromEnd(IItemHandler inventory, @NotNull ItemStack stack, boolean simulate) {
+        if (inventory instanceof cn.sh1rocu.tacz.util.itemhandler.entity.player.PlayerInvWrapper playerInv) {
+            inventory = new PlayerMainInvWrapper(playerInv.getInventoryPlayer());
+        }
+        if (inventory != null && !stack.isEmpty()) {
+            int sizeInventory = inventory.getSlots();
+
+            if (stack.isStackable()) {
+                for (int i = sizeInventory - 1; i >= 0; --i) {
+                    ItemStack slot = inventory.getStackInSlot(i);
+                    if (canItemStacksStackRelaxed(slot, stack)) {
+                        stack = inventory.insertItem(i, stack, simulate);
+                        if (stack.isEmpty()) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!stack.isEmpty()) {
+                for (int i = sizeInventory - 1; i >= 0; --i) {
+                    if (inventory.getStackInSlot(i).isEmpty()) {
+                        stack = inventory.insertItem(i, stack, simulate);
+                        if (stack.isEmpty()) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return stack;
+        } else {
+            return stack;
+        }
+    }
+
+    public static @Nullable ItemEntity dropAtFeet(Player player, @NotNull ItemStack stack, int pickupDelayTicks) {
+        if (stack.isEmpty() || player.level().isClientSide) {
+            return null;
+        }
+        Level level = player.level();
+        double y = player.getY() + 0.1;
+        ItemEntity entityitem = new ItemEntity(level, player.getX(), y, player.getZ(), stack.copy());
+        entityitem.setPickUpDelay(pickupDelayTicks);
+        entityitem.setDeltaMovement(0.0, 0.0, 0.0);
+        level.addFreshEntity(entityitem);
+        return entityitem;
+    }
+
     public static void giveItemToPlayer(Player player, @NotNull ItemStack stack) {
         giveItemToPlayer(player, stack, -1);
     }

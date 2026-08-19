@@ -53,6 +53,21 @@ public final class AttachmentDataUtils {
     }
 
     public static int getMagExtendLevel(ItemStack gunItem, GunData gunData) {
+        if (fr.infuseting.tacz.config.MechanicsConfig.ALLOW_EXTENDED_WITHOUT_ATTACHMENT.get()) {
+            fr.infuseting.tacz.capability.GunMagazineCapability magCap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gunItem);
+            if (magCap.hasMagazine()) {
+                ItemStack storedMag = magCap.getStoredMagazine();
+                if (storedMag.getItem() instanceof fr.infuseting.tacz.item.MagazineItem) {
+                    String familyId = fr.infuseting.tacz.item.MagazineItem.getMagazineFamilyId(storedMag);
+                    if (familyId != null && fr.infuseting.tacz.magazine.MagazineFamilySystem.isExtendedFamily(familyId)) {
+                        int level = fr.infuseting.tacz.magazine.MagazineFamilySystem.getExtLevelForFamily(familyId);
+                        if (level > 0) {
+                            return level;
+                        }
+                    }
+                }
+            }
+        }
         IGun iGun = IGun.getIGunOrNull(gunItem);
         if (iGun == null) {
             return 0;

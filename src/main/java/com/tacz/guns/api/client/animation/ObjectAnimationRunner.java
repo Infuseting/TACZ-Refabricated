@@ -225,6 +225,9 @@ public class ObjectAnimationRunner {
     }
 
     private void updateProgress(long alphaProgress) {
+        if (fr.infuseting.tacz.client.ClientReloadKeyHandler.isFastReloadActive()) {
+            alphaProgress = (long) (alphaProgress * (1.0 / 0.75));
+        }
         if (running) {
             progressNs += alphaProgress;
         }

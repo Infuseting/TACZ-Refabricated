@@ -14,6 +14,7 @@ import com.tacz.guns.client.resource.GunDisplayInstance;
 import com.tacz.guns.client.resource.index.ClientGunIndex;
 import com.tacz.guns.client.resource.pojo.display.gun.AmmoCountStyle;
 import com.tacz.guns.config.client.RenderConfig;
+import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
 import com.tacz.guns.util.AttachmentDataUtils;
@@ -32,6 +33,7 @@ import org.jetbrains.annotations.Nullable;
 import java.text.DecimalFormat;
 
 public class GunHudOverlay {
+    public static final GunHudOverlay INSTANCE = new GunHudOverlay();
     private static final ResourceLocation SEMI = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_semi.png");
     private static final ResourceLocation AUTO = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_auto.png");
     private static final ResourceLocation BURST = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_burst.png");
@@ -47,7 +49,7 @@ public class GunHudOverlay {
 
     private static final int MAX_AMMO_COUNT = 9999;
 
-    public static void render(GuiGraphics graphics, float partialTick) {
+    public void render(GuiGraphics graphics, float partialTick) {
         int width = graphics.guiWidth();
         int height = graphics.guiHeight();
 
@@ -112,6 +114,15 @@ public class GunHudOverlay {
         String inventoryAmmoCountText = useInventoryAmmo ? "" : INVENTORY_AMMO_FORMAT.format(cacheInventoryAmmoCount);
         if (!useInventoryAmmo && gunData.getReloadData().isInfinite()) {
             inventoryAmmoCountText = "∞";
+        }
+
+        boolean isMagHudActive = fr.infuseting.tacz.config.MechanicsConfig.OVERRIDE_AMMO_HUD.get()
+                && gunData.getReloadData().getType().equals(com.tacz.guns.resource.pojo.data.gun.FeedType.MAGAZINE)
+                && fr.infuseting.tacz.magazine.MagazineFamilySystem.getFamilyForGun(gunId) != null;
+
+        if (isMagHudActive) {
+            currentAmmoCountText = "";
+            inventoryAmmoCountText = "";
         }
 
         // 计算弹药数
@@ -199,6 +210,27 @@ public class GunHudOverlay {
     }
 
     private static void handleInventoryAmmo(ItemStack stack, Inventory inventory) {
+        if (stack.getItem() instanceof IGun iGun) {
+            ResourceLocation gunId = iGun.getGunId(stack);
+            CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunId).orElse(null);
+            if (gunIndex != null && gunIndex.getGunData().getReloadData().getType().equals(com.tacz.guns.resource.pojo.data.gun.FeedType.MAGAZINE)
+                    && fr.infuseting.tacz.magazine.MagazineFamilySystem.getFamilyForGun(gunId) != null) {
+                int total = 0;
+                for (int i = 0; i < inventory.getContainerSize(); i++) {
+                    ItemStack slot = inventory.getItem(i);
+                    if (!(slot.getItem() instanceof fr.infuseting.tacz.item.MagazineItem)) continue;
+                    IAmmoBox iAmmoBox = (IAmmoBox) slot.getItem();
+                    if (!iAmmoBox.isAmmoBoxOfGun(stack, slot)) continue;
+                    int ammoPerMag = iAmmoBox.getAmmoCount(slot);
+                    if (ammoPerMag > 0) {
+                        total += ammoPerMag * slot.getCount();
+                    }
+                }
+                cacheInventoryAmmoCount = total;
+                return;
+            }
+        }
+
         cacheInventoryAmmoCount = 0;
         for (int i = 0; i < inventory.getContainerSize(); i++) {
             ItemStack inventoryItem = inventory.getItem(i);

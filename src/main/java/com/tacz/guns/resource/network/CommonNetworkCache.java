@@ -14,6 +14,7 @@ import com.tacz.guns.resource.index.CommonAttachmentIndex;
 import com.tacz.guns.resource.index.CommonBlockIndex;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.modifier.AttachmentPropertyManager;
+import com.tacz.guns.resource.pojo.data.ammo.AmmoData;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import com.tacz.guns.resource.pojo.data.block.BlockData;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
@@ -32,6 +33,7 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
     INSTANCE;
 
     public Map<ResourceLocation, GunData> gunData = new HashMap<>();
+    public Map<ResourceLocation, AmmoData> ammoData = new HashMap<>();
     public Map<ResourceLocation, AttachmentData> attachmentData = new HashMap<>();
     public Map<ResourceLocation, RecipeFilter> recipeFilter = new HashMap<>();
     public Map<ResourceLocation, BlockData> blockData = new HashMap<>();
@@ -46,6 +48,12 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
     @Override
     public GunData getGunData(ResourceLocation id) {
         return gunData.get(id);
+    }
+
+    @Nullable
+    @Override
+    public AmmoData getAmmoData(ResourceLocation id) {
+        return ammoData.get(id);
     }
 
     @Nullable
@@ -124,6 +132,7 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
 
     public void clear() {
         gunData.clear();
+        ammoData.clear();
         attachmentData.clear();
         gunIndex.clear();
         ammoIndex.clear();
@@ -206,6 +215,7 @@ public enum CommonNetworkCache implements ICommonResourceProvider {
             try {
                 switch (type) {
                     case GUN_DATA -> gunData.put(entry.getKey(), parse(entry.getValue(), GunData.class));
+                    case AMMO_DATA -> ammoData.put(entry.getKey(), parse(entry.getValue(), AmmoData.class));
                     case GUN_INDEX -> gunIndex.put(entry.getKey(), parse(entry.getValue(), CommonGunIndex.class));
                     case AMMO_INDEX -> ammoIndex.put(entry.getKey(), parse(entry.getValue(), CommonAmmoIndex.class));
                     case ATTACHMENT_DATA -> attachmentData.put(entry.getKey(), parseAttachmentData(entry.getValue()));

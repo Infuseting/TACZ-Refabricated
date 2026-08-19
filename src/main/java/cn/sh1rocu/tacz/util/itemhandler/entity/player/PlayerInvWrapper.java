@@ -4,7 +4,14 @@ import cn.sh1rocu.tacz.util.itemhandler.CombinedInvWrapper;
 import net.minecraft.world.entity.player.Inventory;
 
 public class PlayerInvWrapper extends CombinedInvWrapper {
+    private final Inventory inventoryPlayer;
+
     public PlayerInvWrapper(Inventory inv) {
         super(new PlayerMainInvWrapper(inv), new PlayerArmorInvWrapper(inv), new PlayerOffhandInvWrapper(inv));
+        this.inventoryPlayer = inv;
+    }
+
+    public Inventory getInventoryPlayer() {
+        return inventoryPlayer;
     }
 }

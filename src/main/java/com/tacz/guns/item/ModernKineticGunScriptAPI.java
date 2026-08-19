@@ -182,6 +182,21 @@ public class ModernKineticGunScriptAPI {
                 // 生成子弹
                 Level world = shooter.level();
                 ResourceLocation ammoId = gunData.getAmmoId();
+                fr.infuseting.tacz.capability.GunMagazineCapability magCap = fr.infuseting.tacz.capability.GunMagazineCapability.of(itemStack);
+                if (magCap.hasMagazine()) {
+                    ItemStack storedMag = magCap.getStoredMagazine();
+                    if (!storedMag.isEmpty()) {
+                        fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(storedMag);
+                        if (!stack.isEmpty()) {
+                            ammoId = stack.peek();
+                        }
+                    }
+                } else {
+                    fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(itemStack);
+                    if (!stack.isEmpty()) {
+                        ammoId = stack.peek();
+                    }
+                }
                 for (int i = 0; i < bulletAmount; i++) {
                     boolean isTracer = bulletData.hasTracerAmmo() && gunOperator.nextBulletIsTracer(bulletData.getTracerCountInterval());
                     EntityKineticBullet bullet = new EntityKineticBullet(world, shooter, itemStack, ammoId, gunId,
@@ -302,7 +317,12 @@ public class ModernKineticGunScriptAPI {
         if (dataHolder.reloadTimestamp == -1) {
             return 0;
         }
-        return System.currentTimeMillis() - dataHolder.reloadTimestamp;
+        long original = System.currentTimeMillis() - dataHolder.reloadTimestamp;
+        if (fr.infuseting.tacz.client.ClientReloadKeyHandler.isFastReloadActive()
+                || (itemStack != null && itemStack.hasTag() && itemStack.getTag().getBoolean("TaCZMag_FastReloadActive"))) {
+            return (long) (original * (1.0 / 0.75));
+        }
+        return original;
     }
 
     /**

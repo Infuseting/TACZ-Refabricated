@@ -41,6 +41,9 @@ public class GunMod {
 
         registerDefaultExtraGunPack();
         AttachmentPropertyManager.registerModifier();
+
+        boolean permApiLoaded = FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0");
+        LOGGER.info("[MetroRP] RateLimiter loaded. Fabric Permissions API detected: {} (permission node: metrorp.logs.ratelimit)", permApiLoaded);
     }
 
     private static void registerDefaultExtraGunPack() {

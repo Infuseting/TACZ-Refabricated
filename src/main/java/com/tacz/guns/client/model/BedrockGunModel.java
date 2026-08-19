@@ -248,8 +248,46 @@ public class BedrockGunModel extends BedrockAnimatedModel {
         if (iGun == null) {
             return;
         }
+
+        fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(gunItem);
+        if (currentGunItem != null && currentGunItem != gunItem) {
+            fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(currentGunItem);
+        }
+
+        boolean savedMagNodeVisible = magazineNode != null && magazineNode.visible;
+        hideMagBoneIfNeeded(gunItem);
+
         currentGunItem = gunItem;
         currentExtendMagLevel = 0;
+
+        if (fr.infuseting.tacz.config.MechanicsConfig.ALLOW_EXTENDED_WITHOUT_ATTACHMENT.get()) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                com.tacz.guns.api.entity.IGunOperator gunOp = com.tacz.guns.api.entity.IGunOperator.fromLivingEntity(mc.player);
+                boolean isReloading = gunOp != null && gunOp.getSynReloadState().getStateType().isReloading();
+                boolean isLocalGun = mc.player.getMainHandItem().getItem() instanceof IGun localIGun
+                        && iGun.getGunId(currentGunItem).equals(localIGun.getGunId(mc.player.getMainHandItem()));
+
+                if (isReloading && isLocalGun) {
+                    int frozen = fr.infuseting.tacz.client.ClientReloadKeyHandler.getFrozenExtLevel();
+                    if (frozen >= 0) {
+                        currentExtendMagLevel = frozen;
+                    }
+                } else {
+                    fr.infuseting.tacz.capability.GunMagazineCapability magCap = fr.infuseting.tacz.capability.GunMagazineCapability.of(currentGunItem);
+                    if (magCap.hasMagazine()) {
+                        ItemStack storedMag = magCap.getStoredMagazine();
+                        if (storedMag.getItem() instanceof fr.infuseting.tacz.item.MagazineItem) {
+                            String familyId = fr.infuseting.tacz.item.MagazineItem.getMagazineFamilyId(storedMag);
+                            if (familyId != null && fr.infuseting.tacz.magazine.MagazineFamilySystem.isExtendedFamily(familyId)) {
+                                currentExtendMagLevel = fr.infuseting.tacz.magazine.MagazineFamilySystem.getExtLevelForFamily(familyId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         adapterToRender.clear();
         // 更新配件物品的缓存，以供渲染使用
         for (AttachmentType type : AttachmentType.values()) {
@@ -265,7 +303,7 @@ public class BedrockGunModel extends BedrockAnimatedModel {
             if (attachment != null) {
                 TimelessAPI.getClientAttachmentIndex(attachment.getAttachmentId(attachmentItem)).ifPresent(index -> {
                     // 读取扩容等级，为扩容弹匣渲染做准备
-                    if (type == AttachmentType.EXTENDED_MAG) {
+                    if (type == AttachmentType.EXTENDED_MAG && currentExtendMagLevel == 0) {
                         currentExtendMagLevel = index.getData().getExtendedMagLevel();
                     }
                     // 读取瞄具 Mount 的渲染需求
@@ -285,6 +323,9 @@ public class BedrockGunModel extends BedrockAnimatedModel {
 
 		if (ARCompat.shouldAccelerate()) {
 			renderAccelerated(matrixStack, gunItem, transformType, renderType, light, overlay);
+			if (magazineNode != null) {
+				magazineNode.visible = savedMagNodeVisible;
+			}
 			return;
 		}
 
@@ -317,6 +358,33 @@ public class BedrockGunModel extends BedrockAnimatedModel {
         RenderHelper.disableItemEntityStencilTest();
         RenderSystem.clearStencil(0);
         RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, Minecraft.ON_OSX);
+        if (magazineNode != null) {
+            magazineNode.visible = savedMagNodeVisible;
+        }
+    }
+
+    private void hideMagBoneIfNeeded(ItemStack targetGun) {
+        if (magazineNode == null || targetGun == null || targetGun.isEmpty()) return;
+        fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(targetGun);
+        if (!(targetGun.getItem() instanceof IGun iGun)) return;
+
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.player == null) return;
+
+        ResourceLocation gunId = iGun.getGunId(targetGun);
+        if (fr.infuseting.tacz.magazine.MagazineFamilySystem.getFamilyForGun(gunId) == null) return;
+
+        boolean isLocalGun = mc.player.getMainHandItem().getItem() instanceof IGun localIGun
+                && gunId.equals(localIGun.getGunId(mc.player.getMainHandItem()));
+        if (isLocalGun) {
+            com.tacz.guns.api.entity.IGunOperator gunOp = com.tacz.guns.api.entity.IGunOperator.fromLivingEntity(mc.player);
+            if (gunOp != null && gunOp.getSynReloadState().getStateType().isReloading()) return;
+        }
+
+        boolean hasMag = fr.infuseting.tacz.capability.GunMagazineCapability.of(targetGun).hasMagazine();
+        if (!hasMag) {
+            magazineNode.visible = false;
+        }
     }
 
 	public void renderAccelerated(PoseStack matrixStack, ItemStack gunItem, ItemDisplayContext transformType, RenderType renderType, int light, int overlay) {

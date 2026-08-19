@@ -26,7 +26,27 @@ public class ReloadKey {
             "key.category.tacz");
 
     public static void onReloadPress(InputEvent.Key event) {
-        if (isInGame() && event.getAction() == GLFW.GLFW_PRESS && RELOAD_KEY.matches(event.getKey(), event.getScanCode())) {
+        if (!isInGame()) return;
+        if (!RELOAD_KEY.matches(event.getKey(), event.getScanCode())) return;
+
+        if (fr.infuseting.tacz.client.ModKeybinds.matchesUnloadKey(event.getKey(), event.getScanCode())
+                || fr.infuseting.tacz.client.ModKeybinds.matchesCheckKey(event.getKey(), event.getScanCode())
+                || fr.infuseting.tacz.client.ModKeybinds.matchesFastReloadKey(event.getKey(), event.getScanCode())
+                || net.minecraft.client.gui.screens.Screen.hasControlDown()
+                || net.minecraft.client.gui.screens.Screen.hasAltDown()) {
+            return;
+        }
+
+        if (event.getAction() == GLFW.GLFW_RELEASE) {
+            fr.infuseting.tacz.client.ClientReloadKeyHandler.onReloadKeyReleased();
+            return;
+        }
+
+        if (event.getAction() == GLFW.GLFW_PRESS) {
+            if (fr.infuseting.tacz.client.ClientReloadKeyHandler.onReloadKeyPressed()) {
+                return;
+            }
+
             LocalPlayer player = Minecraft.getInstance().player;
             if (player == null || player.isSpectator()) {
                 return;

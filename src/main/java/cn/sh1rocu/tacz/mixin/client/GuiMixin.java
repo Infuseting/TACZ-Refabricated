@@ -41,7 +41,7 @@ public class GuiMixin {
 
     @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;enableBlend()V", ordinal = 1, shift = At.Shift.BEFORE, remap = false))
     private void tacz$renderCrosshairPre(GuiGraphics context, float tickDelta, CallbackInfo ci) {
-        RenderCrosshairEvent.onRenderOverlay(context, Minecraft.getInstance().getWindow());
+        //RenderCrosshairEvent.onRenderOverlay(context, Minecraft.getInstance().getWindow());
     }
 
     // 需要渲染枪械准心时取消原版渲染

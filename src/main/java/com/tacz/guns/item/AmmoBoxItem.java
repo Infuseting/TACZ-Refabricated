@@ -95,14 +95,88 @@ public class AmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItem
     }
 
     @Override
-    public boolean overrideOtherStackedOnMe(ItemStack stack, ItemStack pOther, Slot slot, ClickAction action, Player player, SlotAccess access) {
-        return super.overrideOtherStackedOnMe(stack, pOther, slot, action, player, access);
+    public boolean overrideOtherStackedOnMe(ItemStack box, ItemStack heldStack, Slot slot, ClickAction action, Player player, SlotAccess heldAccess) {
+        if (action == ClickAction.SECONDARY) {
+            if (heldStack.isEmpty() && fr.infuseting.tacz.item.AmmoBoxMagazineStorage.count(box) > 0) {
+                if (!player.level().isClientSide || player.getAbilities().instabuild) {
+                    ItemStack extracted = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.extractLastStack(box);
+                    if (!extracted.isEmpty()) {
+                        heldAccess.set(extracted);
+                        slot.setChanged();
+                    }
+                }
+                playRemoveOneSound(player);
+                return true;
+            }
+        }
+        return super.overrideOtherStackedOnMe(box, heldStack, slot, action, player, heldAccess);
     }
 
     @Override
     public boolean overrideStackedOnOther(ItemStack ammoBox, Slot slot, ClickAction action, Player player) {
         // 右击
         if (action == ClickAction.SECONDARY) {
+            ItemStack target = slot.getItem();
+
+            if (target.isEmpty() && fr.infuseting.tacz.item.AmmoBoxMagazineStorage.count(ammoBox) > 0) {
+                if (!player.level().isClientSide || player.getAbilities().instabuild) {
+                    ItemStack extracted = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.extractLastStack(ammoBox);
+                    ItemStack leftover = slot.safeInsert(extracted);
+                    if (!leftover.isEmpty()) {
+                        fr.infuseting.tacz.item.AmmoBoxMagazineStorage.insertFromStack(ammoBox, leftover);
+                    }
+                }
+                playRemoveOneSound(player);
+                return true;
+            }
+
+            if (target.getItem() instanceof fr.infuseting.tacz.item.MagazineItem) {
+                boolean canInsert = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.canInsert(ammoBox, target);
+                if (!player.level().isClientSide || player.getAbilities().instabuild) {
+                    int inserted = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.insertFromStack(ammoBox, target);
+                    if (inserted > 0) {
+                        target.shrink(inserted);
+                        slot.setChanged();
+                    }
+                }
+                if (canInsert) playInsertSound(player);
+                return true;
+            }
+
+            if (fr.infuseting.tacz.item.AmmoBoxMagazineStorage.count(ammoBox) > 0 && target.getItem() instanceof IAmmo ammo) {
+                if (fr.infuseting.tacz.config.MechanicsConfig.SEPARATE_AMMO_BOX_CONTENTS.get()) {
+                    return true;
+                }
+
+                if (!isCreative(ammoBox) && !isAllTypeCreative(ammoBox)) {
+                    ResourceLocation targetAmmoId = ammo.getAmmoId(target);
+                    if (!DefaultAssets.EMPTY_AMMO_ID.equals(targetAmmoId)) {
+                        ResourceLocation boxAmmoId = getAmmoId(ammoBox);
+                        if (DefaultAssets.EMPTY_AMMO_ID.equals(boxAmmoId) || boxAmmoId.equals(targetAmmoId)) {
+                            int ammoStackSize = TimelessAPI.getCommonAmmoIndex(targetAmmoId)
+                                    .map(index -> Math.max(1, index.getStackSize()))
+                                    .orElse(1);
+                            int ammoSlots = Math.max(0,
+                                    fr.infuseting.tacz.item.AmmoBoxMagazineStorage.totalSlots(ammoBox)
+                                            - fr.infuseting.tacz.item.AmmoBoxMagazineStorage.magazineSlotsUsed(ammoBox));
+                            int room = ammoSlots * ammoStackSize - getAmmoCount(ammoBox);
+
+                            if (!player.level().isClientSide && room > 0) {
+                                int inserted = Math.min(room, target.getCount());
+                                if (DefaultAssets.EMPTY_AMMO_ID.equals(boxAmmoId)) {
+                                    setAmmoId(ammoBox, targetAmmoId);
+                                }
+                                setAmmoCount(ammoBox, getAmmoCount(ammoBox) + inserted);
+                                target.shrink(inserted);
+                                slot.setChanged();
+                            }
+                            if (room > 0) playInsertSound(player);
+                            return true;
+                        }
+                    }
+                }
+            }
+
             // 点击的格子
             ItemStack slotItem = slot.getItem();
             ResourceLocation boxAmmoId = this.getAmmoId(ammoBox);
@@ -189,6 +263,10 @@ public class AmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItem
 
     @Override
     public boolean isBarVisible(ItemStack stack) {
+        if (fr.infuseting.tacz.item.AmmoBoxMagazineStorage.count(stack) > 0
+                && !(isCreative(stack) || isAllTypeCreative(stack))) {
+            return true;
+        }
         if (isAllTypeCreative(stack) || isCreative(stack)) {
             return false;
         }
@@ -197,6 +275,13 @@ public class AmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItem
 
     @Override
     public int getBarWidth(ItemStack stack) {
+        if (fr.infuseting.tacz.item.AmmoBoxMagazineStorage.count(stack) > 0) {
+            int totalSlots = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.totalSlots(stack);
+            if (totalSlots > 0) {
+                double fullness = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.usedSlotFill(stack) / totalSlots;
+                return (int) Math.min(1.0 + 12.0 * fullness, 13.0);
+            }
+        }
         ResourceLocation ammoId = this.getAmmoId(stack);
         int ammoCount = this.getAmmoCount(stack);
         int boxLevelMultiplier = this.getAmmoLevel(stack) + 1;
@@ -286,5 +371,15 @@ public class AmmoBoxItem extends Item implements DyeableLeatherItem, AmmoBoxItem
         }
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.deposit").withStyle(ChatFormatting.GRAY));
         components.add(Component.translatable("tooltip.tacz.ammo_box.usage.remove").withStyle(ChatFormatting.GRAY));
+        int storedMags = fr.infuseting.tacz.item.AmmoBoxMagazineStorage.count(stack);
+        if (storedMags > 0) {
+            components.add(Component.literal("Magazines: " + storedMags + "/" + fr.infuseting.tacz.item.AmmoBoxMagazineStorage.capacity(stack))
+                    .withStyle(ChatFormatting.GOLD));
+            components.add(Component.literal("Used slots: "
+                            + (fr.infuseting.tacz.item.AmmoBoxMagazineStorage.bulletSlotsUsed(stack)
+                            + fr.infuseting.tacz.item.AmmoBoxMagazineStorage.magazineSlotsUsed(stack))
+                            + "/" + fr.infuseting.tacz.item.AmmoBoxMagazineStorage.totalSlots(stack))
+                    .withStyle(ChatFormatting.DARK_GRAY));
+        }
     }
 }

@@ -207,6 +207,38 @@ public class GunAnimationStateContext extends ItemAnimationStateContext {
      * @return 扩容等级，范围 0 ~ 3。0 表示没有安装扩容弹匣，1 ~ 3 表示安装了扩容等级 1 ~ 3 的扩容弹匣
      */
     public int getMagExtentLevel() {
+        if (fr.infuseting.tacz.config.MechanicsConfig.ALLOW_EXTENDED_WITHOUT_ATTACHMENT.get()
+                && currentGunItem != null && !currentGunItem.isEmpty() && currentGunItem.getItem() instanceof IGun iGunCheck) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player != null) {
+                com.tacz.guns.api.entity.IGunOperator gunOp = com.tacz.guns.api.entity.IGunOperator.fromLivingEntity(mc.player);
+                boolean isReloading = gunOp != null && gunOp.getSynReloadState().getStateType().isReloading();
+                boolean isLocalGun = mc.player.getMainHandItem().getItem() instanceof IGun localIGun
+                        && iGunCheck.getGunId(currentGunItem).equals(localIGun.getGunId(mc.player.getMainHandItem()));
+
+                if (isReloading && isLocalGun) {
+                    int frozen = fr.infuseting.tacz.client.ClientReloadKeyHandler.getFrozenExtLevel();
+                    if (frozen >= 0) {
+                        return frozen;
+                    }
+                } else {
+                    fr.infuseting.tacz.client.ClientReloadKeyHandler.clearFrozenExtLevel();
+                    int baseLevel = processGunData((iG, gunIdx) -> AttachmentDataUtils.getMagExtendLevel(currentGunItem, gunData)).orElse(0);
+                    if (baseLevel > 0) return baseLevel;
+
+                    fr.infuseting.tacz.capability.GunMagazineCapability magCap = fr.infuseting.tacz.capability.GunMagazineCapability.of(currentGunItem);
+                    if (magCap.hasMagazine()) {
+                        ItemStack storedMag = magCap.getStoredMagazine();
+                        if (storedMag.getItem() instanceof fr.infuseting.tacz.item.MagazineItem) {
+                            String familyId = fr.infuseting.tacz.item.MagazineItem.getMagazineFamilyId(storedMag);
+                            if (familyId != null && fr.infuseting.tacz.magazine.MagazineFamilySystem.isExtendedFamily(familyId)) {
+                                return fr.infuseting.tacz.magazine.MagazineFamilySystem.getExtLevelForFamily(familyId);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return processGunData(
                 (iGun, gunIndex) ->
                         AttachmentDataUtils.getMagExtendLevel(currentGunItem, gunData)

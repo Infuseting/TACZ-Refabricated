@@ -1,0 +1,18 @@
+{
+  "required": true,
+  "package": "fr.infuseting.tacz.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "tacz.refmap.json",
+  "mixins": [
+    "MixinLivingEntity",
+    "MixinItemEntity"
+  ],
+  "client": [
+    "MixinMouseHandler",
+    "MixinClientPacketListener"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
+}

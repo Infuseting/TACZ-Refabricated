@@ -13,6 +13,9 @@ public class BulletData {
     @SerializedName("damage")
     private float damageAmount = 5;
 
+    @SerializedName("damage_multiplier")
+    private float damageMultiplier = 1.0f;
+
     @SerializedName("extra_damage")
     private @Nullable ExtraDamage extraDamage = null;
 
@@ -53,6 +56,10 @@ public class BulletData {
 
     public float getDamageAmount() {
         return damageAmount;
+    }
+
+    public float getDamageMultiplier() {
+        return damageMultiplier;
     }
 
     @Nullable

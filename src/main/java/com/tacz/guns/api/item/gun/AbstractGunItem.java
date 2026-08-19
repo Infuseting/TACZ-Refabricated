@@ -118,6 +118,33 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         projectile.shootFromRotation(shooter, pitch, yaw, 0.0F, processedSpeed, inaccuracy);
     }
 
+    private static final ThreadLocal<LivingEntity> CURRENT_SHOOTER = new ThreadLocal<>();
+
+    private static CommonGunIndex getManagedGunIndex(AbstractGunItem gunItem, ItemStack gun) {
+        ResourceLocation gunId = gunItem.getGunId(gun);
+        CommonGunIndex index = TimelessAPI.getCommonGunIndex(gunId).orElse(null);
+        if (index == null) return null;
+        if (index.getGunData().getReloadData().getType() != FeedType.MAGAZINE) return null;
+        return fr.infuseting.tacz.magazine.MagazineFamilySystem.getFamilyForGun(gunId) == null ? null : index;
+    }
+
+    private static void writeGunAmmoToMagazine(ItemStack magazine, int ammo, ResourceLocation ammoId) {
+        if (!(magazine.getItem() instanceof fr.infuseting.tacz.item.MagazineItem magItem)) return;
+        if (ammo > 0 && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+            magItem.setAmmoId(magazine, ammoId);
+            magItem.setAmmoCount(magazine, ammo);
+        } else {
+            magItem.setAmmoCount(magazine, 0);
+            magItem.setAmmoId(magazine, DefaultAssets.EMPTY_AMMO_ID);
+        }
+    }
+
+    private static void clearLegacyCreativeSourceMarker(ItemStack magazine) {
+        if (magazine.hasTag()) {
+            magazine.getTag().remove("TaCZMagazinesCreativeSource");
+        }
+    }
+
     /**
      * 换弹前的检查，完成如下检查：枪内弹药是否已经填满？玩家背包是否有可用弹药？是否为背包直读？
      *
@@ -126,6 +153,53 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      * @return 是否满足换弹条件
      */
     public boolean canReload(LivingEntity shooter, ItemStack gunItem) {
+        CURRENT_SHOOTER.set(shooter);
+        fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(gunItem);
+        CommonGunIndex managedIndex = getManagedGunIndex(this, gunItem);
+        if (managedIndex != null) {
+            if (shooter instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                    && fr.infuseting.tacz.network.OpenSelectorPacket.SELECTING_PLAYERS.contains(serverPlayer.getUUID())) {
+                return false;
+            }
+
+            if (useInventoryAmmo(gunItem)) {
+                return false;
+            }
+
+            if (shooter instanceof Player player && player.getAbilities().instabuild) {
+                return true;
+            }
+
+            if (managedIndex.getGunData().getReloadData().isInfinite()) {
+                return true;
+            }
+
+            if (useDummyAmmo(gunItem)) {
+                return getDummyAmmoAmount(gunItem) > 0;
+            }
+
+            int current = getCurrentAmmoCount(gunItem);
+            int maximum = AttachmentDataUtils.getAmmoCountWithAttachment(gunItem, managedIndex.getGunData());
+            if (current >= maximum) {
+                fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gunItem);
+                if (cap.hasMagazine()) {
+                    return true;
+                }
+            }
+
+            fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gunItem);
+            if (cap.hasMagazine()) {
+                ItemStack stored = cap.getStoredMagazine();
+                if (stored.getItem() instanceof fr.infuseting.tacz.item.MagazineItem magItem && magItem.getAmmoCount(stored) > 0) {
+                    return true;
+                }
+            }
+
+            return shooter.tacz$getItemHandler(null)
+                    .map(handler -> fr.infuseting.tacz.item.MagazineReloadSource.hasUsableMagazine(handler, gunItem))
+                    .orElse(false);
+        }
+
         ResourceLocation gunId = this.getGunId(gunItem);
         CommonGunIndex gunIndex = TimelessAPI.getCommonGunIndex(gunId).orElse(null);
         if (gunIndex == null) {
@@ -174,6 +248,46 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      */
     @Override
     public void dropAllAmmo(Player player, ItemStack gunItem) {
+        fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(gunItem);
+        CommonGunIndex managedIndex = getManagedGunIndex(this, gunItem);
+        if (managedIndex != null) {
+            if (player instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                    && fr.infuseting.tacz.network.OpenSelectorPacket.SELECTING_PLAYERS.contains(serverPlayer.getUUID())) {
+                return;
+            }
+
+            int remaining = getCurrentAmmoCount(gunItem);
+            ResourceLocation ammoId = managedIndex.getGunData().getAmmoId();
+            boolean hadMagazine = false;
+
+            fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gunItem);
+            if (cap.hasMagazine()) {
+                hadMagazine = true;
+                ItemStack stored = cap.getStoredMagazine();
+
+                setCurrentAmmoCount(gunItem, 0);
+                cap.clearMagazine();
+
+                writeGunAmmoToMagazine(stored, remaining, ammoId);
+                clearLegacyCreativeSourceMarker(stored);
+                IItemHandler itemHandler = player.tacz$getItemHandler(null).orElse(null);
+                ItemStack leftover = ItemHandlerHelper.insertItemStackedFromEnd(itemHandler, stored, false);
+                if (!leftover.isEmpty()) player.drop(leftover, false);
+            }
+
+            if (!hadMagazine) {
+                boolean hasBulletInBarrel = hasBulletInBarrel(gunItem);
+                int count = (hasBulletInBarrel ? 1 : 0) + remaining;
+                if (count > 0 && ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+                    ItemStack bullet = AmmoItemBuilder.create().setId(ammoId).setCount(count).build();
+                    if (!player.getInventory().add(bullet)) player.drop(bullet, false);
+                    setBulletInBarrel(gunItem, false);
+                    setCurrentAmmoCount(gunItem, 0);
+                }
+            }
+            return;
+        }
+
         // 背包直读时不调用退弹
         if (useInventoryAmmo(gunItem)) {
             return;
@@ -245,6 +359,72 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
      * @return 寻找到的弹药 (物品) 数量
      */
     public int findAndExtractInventoryAmmo(IItemHandler itemHandler, ItemStack gunItem, int needAmmoCount) {
+        fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(gunItem);
+        CommonGunIndex managedIndex = getManagedGunIndex(this, gunItem);
+        if (managedIndex != null) {
+            if (fr.infuseting.tacz.client.ClientReloadKeyHandler.isSelectorOpen()) {
+                return 0;
+            }
+
+            LivingEntity shooter = CURRENT_SHOOTER.get();
+            CURRENT_SHOOTER.remove();
+
+            boolean isFastReload = gunItem.hasTag() && gunItem.getTag().getBoolean("TaCZMag_FastReload");
+            if (gunItem.hasTag()) gunItem.getTag().remove("TaCZMag_FastReload");
+
+            int currentAmmo = getCurrentAmmoCount(gunItem);
+            ResourceLocation gunAmmoId = managedIndex.getGunData().getAmmoId();
+            boolean ejectFailed = false;
+
+            fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gunItem);
+            if (cap.hasMagazine()) {
+                ItemStack stored = cap.getStoredMagazine();
+
+                writeGunAmmoToMagazine(stored, currentAmmo, gunAmmoId);
+                clearLegacyCreativeSourceMarker(stored);
+                cap.setStoredMagazine(stored);
+                stored = cap.getStoredMagazine();
+
+                if (isFastReload && shooter instanceof Player player) {
+                    ItemHandlerHelper.dropAtFeet(player, stored, 100);
+                    cap.clearMagazine();
+                    setCurrentAmmoCount(gunItem, 0);
+                } else {
+                    ItemStack leftover = ItemHandlerHelper.insertItemStackedFromEnd(itemHandler, stored, false);
+                    if (!leftover.isEmpty() && shooter instanceof Player player) {
+                        ItemHandlerHelper.dropAtFeet(player, leftover, 40);
+                    }
+                    cap.clearMagazine();
+                    setCurrentAmmoCount(gunItem, 0);
+                }
+            }
+
+            if (ejectFailed) {
+                return 0;
+            }
+
+            int selectedSlot = -1;
+            if (gunItem.hasTag() && gunItem.getTag().contains("TaCZMag_SelectedSlot")) {
+                selectedSlot = gunItem.getTag().getInt("TaCZMag_SelectedSlot");
+                gunItem.getTag().remove("TaCZMag_SelectedSlot");
+            }
+
+            boolean creativeReload = gunItem.hasTag()
+                    && gunItem.getTag().getBoolean("TaCZMag_CreativeReload");
+            if (gunItem.hasTag()) gunItem.getTag().remove("TaCZMag_CreativeReload");
+
+            ItemStack magazine = creativeReload
+                    ? fr.infuseting.tacz.item.MagazineReloadSource.createCreativeReloadMagazine(itemHandler, gunItem, selectedSlot)
+                    : fr.infuseting.tacz.item.MagazineReloadSource.extract(itemHandler, gunItem, selectedSlot);
+            if (!(magazine.getItem() instanceof fr.infuseting.tacz.item.MagazineItem magItem)) {
+                return 0;
+            }
+
+            int ammo = magItem.getAmmoCount(magazine);
+            cap.setStoredMagazine(magazine);
+            fr.infuseting.tacz.TaCZMagazines.LOGGER.debug("Loaded magazine with {} rounds", ammo);
+            return ammo;
+        }
         int cnt = needAmmoCount;
         // 背包检查
         for (int i = 0; i < itemHandler.getSlots(); i++) {

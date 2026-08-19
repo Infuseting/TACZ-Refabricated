@@ -147,6 +147,8 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
     private float armorIgnore;
     private float headShot;
     private float shotDamageMultiplier = 1f;
+    private Float overrideDamage = null;
+    private float gunDamageMultiplier = 1.0f;
 
     public EntityKineticBullet(EntityType<? extends Projectile> type, Level worldIn) {
         super(type, worldIn);
@@ -220,6 +222,26 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
         this.startPos = this.position();
         this.isTracerAmmo = isTracerAmmo;
         this.gunDisplayId = gunDisplayId;
+        if (gunData != null) {
+            this.gunDamageMultiplier = gunData.getDamageMultiplier();
+        }
+
+        var ammoDataOpt = com.tacz.guns.api.TimelessAPI.getCommonAmmoData(this.ammoId);
+        if (ammoDataOpt.isPresent()) {
+            com.tacz.guns.resource.pojo.data.ammo.AmmoData ammoData = ammoDataOpt.get();
+            if (ammoData.getDamage() != null) {
+                this.overrideDamage = ammoData.getDamage();
+            }
+            if (ammoData.getKnockback() != null) {
+                this.knockback = Math.max(ammoData.getKnockback(), 0f);
+            }
+            if (ammoData.getFriction() != null) {
+                this.friction = Mth.clamp(ammoData.getFriction(), 0f, Float.MAX_VALUE);
+            }
+            if (ammoData.getPierce() != null) {
+                this.pierce = Math.max(1, ammoData.getPierce());
+            }
+        }
     }
 
     @ApiStatus.Internal
@@ -520,19 +542,20 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
 
     // 根据距离进行伤害衰减设计
     public float getDamage(Vec3 hitVec) {
-        // 如果忘记写最大值，那我就直接认为你伤害为 0
         float base = 0;
-        // 遍历进行判断
-        double playerDistance = hitVec.distanceTo(this.startPos);
-        for (DistanceDamagePair pair : this.damageAmount) {
-            float effectiveDistance = this.damageAmount.get(0).getDistance() == pair.getDistance() ? this.distanceAmount : pair.getDistance();
-            if (playerDistance < effectiveDistance) {
-                float damage = pair.getDamage();
-                base = Math.max(damage * this.damageModifier, 0F);
-                break;
+        if (this.overrideDamage != null) {
+            base = Math.max(this.overrideDamage * this.gunDamageMultiplier * this.damageModifier, 0F);
+        } else {
+            double playerDistance = hitVec.distanceTo(this.startPos);
+            for (DistanceDamagePair pair : this.damageAmount) {
+                float effectiveDistance = this.damageAmount.get(0).getDistance() == pair.getDistance() ? this.distanceAmount : pair.getDistance();
+                if (playerDistance < effectiveDistance) {
+                    float damage = pair.getDamage();
+                    base = Math.max(damage * this.damageModifier, 0F);
+                    break;
+                }
             }
         }
-        // 让脚本修改枪械伤害
         float modifiedDamage = modifyProperty(GunProperties.DAMAGE, Float.class, base);
         return Math.max(modifiedDamage * this.shotDamageMultiplier, 0F);
     }

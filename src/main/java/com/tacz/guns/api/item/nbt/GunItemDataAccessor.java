@@ -217,6 +217,24 @@ public interface GunItemDataAccessor extends IGun {
     default void reduceCurrentAmmoCount(ItemStack gun) {
         // 只在不使用背包直读的情况下减少 AmmoCount
         if (!useInventoryAmmo(gun)) {
+            fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gun);
+            if (cap.hasMagazine()) {
+                ItemStack stored = cap.getStoredMagazine();
+                if (!stored.isEmpty()) {
+                    fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(stored);
+                    if (!stack.isEmpty()) {
+                        stack.pop();
+                        stack.saveToItemStack(stored);
+                        cap.setStoredMagazine(stored);
+                    }
+                }
+            } else {
+                fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(gun);
+                if (!stack.isEmpty()) {
+                    stack.pop();
+                    stack.saveToItemStack(gun);
+                }
+            }
             setCurrentAmmoCount(gun, getCurrentAmmoCount(gun) - 1);
         }
     }

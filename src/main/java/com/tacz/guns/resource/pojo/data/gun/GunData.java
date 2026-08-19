@@ -44,6 +44,9 @@ public class GunData {
     @SerializedName("rpm")
     private int roundsPerMinute = 300;
 
+    @SerializedName("damage_multiplier")
+    private float damageMultiplier = 1.0f;
+
     @SerializedName("bullet")
     private BulletData bulletData = new BulletData();
 
@@ -132,6 +135,16 @@ public class GunData {
 
     public ResourceLocation getAmmoId() {
         return ammoId;
+    }
+
+    public float getDamageMultiplier() {
+        if (damageMultiplier != 1.0f) {
+            return damageMultiplier;
+        }
+        if (bulletData != null) {
+            return bulletData.getDamageMultiplier();
+        }
+        return 1.0f;
     }
 
     public int getAmmoAmount() {

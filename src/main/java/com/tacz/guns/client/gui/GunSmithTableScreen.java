@@ -195,6 +195,15 @@ public class GunSmithTableScreen extends AbstractContainerScreen<GunSmithTableMe
     }
 
     private boolean isSuitableForMainHand(GunSmithTableRecipe recipe) {
+        ResourceLocation blockId = menu.getBlockId();
+        if (new ResourceLocation("tacz", "ammo_workbench").equals(blockId)) {
+            ItemStack output = recipe.getOutput();
+            if (output.getItem() instanceof fr.infuseting.tacz.item.MagazineItem magazine) {
+                Minecraft minecraft = Minecraft.getInstance();
+                ItemStack heldGun = minecraft.player != null ? minecraft.player.getMainHandItem() : ItemStack.EMPTY;
+                return magazine.isAmmoBoxOfGun(heldGun, output);
+            }
+        }
         if (filterList != null && filterList.isByHandSelected()) {
             ItemStack result = recipe.getResult().getResult();
 

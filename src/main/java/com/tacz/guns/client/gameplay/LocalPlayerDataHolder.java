@@ -116,6 +116,7 @@ public class LocalPlayerDataHolder {
         }
         // 释放状态锁
         clientStateLock = false;
+        fr.infuseting.tacz.client.ClientReloadKeyHandler.resetFastReload(player);
     }
 
     /**
@@ -135,5 +136,6 @@ public class LocalPlayerDataHolder {
         isBolting = false;
         // 打开状态锁
         clientStateLock = false;
+        fr.infuseting.tacz.client.ClientReloadKeyHandler.resetFastReload(player);
     }
 }

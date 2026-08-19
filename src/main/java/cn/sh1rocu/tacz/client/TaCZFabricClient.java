@@ -39,6 +39,7 @@ public class TaCZFabricClient implements ClientModInitializer {
         ParticleFactories.registerParticles();
         BuiltInRegistries.ITEM.stream().filter(item -> item instanceof IItem).forEach(clientEx ->
                 BuiltinItemRendererRegistry.INSTANCE.register(clientEx, ((IItem) clientEx).getCustomRenderer()));
+        new fr.infuseting.tacz.client.TaCZMagazinesClient().onInitializeClient();
         subscribeEvents();
     }
 
@@ -80,8 +81,6 @@ public class TaCZFabricClient implements ClientModInitializer {
         ClientTickEvents.START_CLIENT_TICK.register(RefreshClonePlayerDataEvent::onClientTick);
 
         TextureStitchEvent.POST.register(ReloadResourceEvent::onTextureStitchEventPost);
-
-        RenderTickEvent.EVENT.register(RenderCrosshairEvent::onRenderTick);
 
         RenderLivingEvent.POST.register(RenderHeadShotAABB::onRenderEntity);
 

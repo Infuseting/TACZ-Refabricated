@@ -21,6 +21,7 @@ import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.manager.*;
 import com.tacz.guns.resource.network.CommonNetworkCache;
 import com.tacz.guns.resource.network.DataType;
+import com.tacz.guns.resource.pojo.data.ammo.AmmoData;
 import com.tacz.guns.resource.pojo.data.attachment.AttachmentData;
 import com.tacz.guns.resource.pojo.data.block.BlockData;
 import com.tacz.guns.resource.pojo.data.block.TabConfig;
@@ -66,6 +67,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
 
     private final List<INetworkCacheReloadListener> listeners = new ArrayList<>();
     private CommonDataManager<GunData> gunData;
+    private CommonDataManager<AmmoData> ammoData;
     private CommonDataManager<AttachmentData> attachmentData;
     private CommonDataManager<BlockData> blockData;
     private CommonDataManager<CommonAmmoIndex> ammoIndex;
@@ -82,6 +84,7 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     public void reloadAndRegister(Consumer<PreparableReloadListener> register) {
         // 这里会顺序重载，所以需要把index这种依赖data的放在后面
         gunData = register(new CommonDataManager<>(DataType.GUN_DATA, GunData.class, GSON, "data/guns", "GunDataLoader"));
+        ammoData = register(new CommonDataManager<>(DataType.AMMO_DATA, AmmoData.class, GSON, "data/ammo", "AmmoDataLoader"));
         attachmentData = register(new AttachmentDataManager());
         attachmentsTagManager = register(new AttachmentsTagManager());
         recipeFilterManager = register(new RecipeFilterManager());
@@ -120,6 +123,12 @@ public class CommonAssetsManager implements ICommonResourceProvider {
     @Override
     public GunData getGunData(ResourceLocation id) {
         return gunData.getData(id);
+    }
+
+    @Nullable
+    @Override
+    public AmmoData getAmmoData(ResourceLocation id) {
+        return ammoData.getData(id);
     }
 
     @Nullable
