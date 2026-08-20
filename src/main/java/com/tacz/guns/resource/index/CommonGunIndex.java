@@ -15,6 +15,7 @@ import org.slf4j.Marker;
 import org.slf4j.MarkerFactory;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 public class CommonGunIndex {
@@ -58,6 +59,14 @@ public class CommonGunIndex {
         Preconditions.checkArgument(data.getReloadData().getType() != null, "reload type is error");
         Preconditions.checkArgument(!data.getFireModeSet().isEmpty(), "fire mode is empty");
         Preconditions.checkArgument(!data.getFireModeSet().contains(null) && !data.getFireModeSet().contains(FireMode.UNKNOWN), "fire mode is error");
+        List<FireMode> fireModes = new java.util.ArrayList<>();
+        fireModes.add(FireMode.SAFE);
+        for (FireMode mode : data.getFireModeSet()) {
+            if (mode != FireMode.SAFE && mode != FireMode.UNKNOWN) {
+                fireModes.add(mode);
+            }
+        }
+        data.setFireModeSet(fireModes);
         checkInaccuracy(data);
         checkRecoil(data);
         checkScript(data, index);

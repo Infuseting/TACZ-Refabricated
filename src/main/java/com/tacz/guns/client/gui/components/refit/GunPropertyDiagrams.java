@@ -72,6 +72,8 @@ public final class GunPropertyDiagrams {
                 fireModeText.append(Component.translatable("gui.tacz.gun_refit.property_diagrams.semi"));
             } else if (fireMode == FireMode.BURST) {
                 fireModeText.append(Component.translatable("gui.tacz.gun_refit.property_diagrams.burst"));
+            } else if (fireMode == FireMode.SAFE) {
+                fireModeText.append(Component.translatable("gui.tacz.gun_refit.property_diagrams.safe"));
             } else {
                 fireModeText.append(Component.translatable("gui.tacz.gun_refit.property_diagrams.unknown"));
             }

@@ -7,6 +7,7 @@ import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.api.event.common.GunReloadEvent;
 import com.tacz.guns.api.item.IGun;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
 import com.tacz.guns.client.resource.GunDisplayInstance;
 import com.tacz.guns.client.resource.index.ClientGunIndex;
@@ -53,6 +54,9 @@ public class LocalPlayerReload {
         // 暂定只有主手可以装弹
         ItemStack mainHandItem = player.getMainHandItem();
         if (!(mainHandItem.getItem() instanceof AbstractGunItem gunItem)) {
+            return;
+        }
+        if (gunItem.getFireMode(mainHandItem) == FireMode.SAFE) {
             return;
         }
         ResourceLocation gunId = gunItem.getGunId(mainHandItem);

@@ -66,6 +66,10 @@ public class LocalPlayerShoot {
         ClientGunIndex gunIndex = gunIndexOptional.get();
         GunData gunData = gunIndex.getGunData();
         FireMode fireMode = iGun.getFireMode(mainHandItem);
+        if (fireMode == FireMode.SAFE) {
+            data.chargeProgress = 0f;
+            return false;
+        }
 
         ChargeData chargeData = gunData.getChargeData(fireMode);
         if (chargeData == null) {
@@ -182,6 +186,10 @@ public class LocalPlayerShoot {
 
     private @Nullable ShootResult preCheck(IGun iGun, IGunOperator gunOperator, ClientGunIndex gunIndex, ItemStack mainHandItem,
                                            GunDisplayInstance display, GunData gunData, boolean playDrySound) {
+        if (iGun.getFireMode(mainHandItem) == FireMode.SAFE) {
+            return ShootResult.NOT_GUN;
+        }
+
         // 按钮冷却时间未到，防止点击按钮后误触开火
         // 默认设置为 50 ms
         if (System.currentTimeMillis() - LocalPlayerDataHolder.clientClickButtonTimestamp < 50) {

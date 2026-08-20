@@ -525,6 +525,56 @@
 				}
 			}
 		},
+		"safe_upper": {
+			"loop": true,
+			"animation_length": 1.0,
+			"bones": {
+				"right_arm": {
+					"rotation": {
+						"0.0": {
+							"post": [-39.64643, -15.57509, -20.29128],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-39.64643, -15.57509, -20.29128],
+							"lerp_mode": "catmullrom"
+						}
+					},
+					"position": {
+						"0.0": {
+							"post": [1.58, -2.5, -2.05],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [1.58, -2.5, -2.05],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"left_arm": {
+					"rotation": {
+						"0.0": {
+							"post": [-35.14643, 14.42491, 12.20872],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-35.14643, 14.42491, 12.20872],
+							"lerp_mode": "catmullrom"
+						}
+					},
+					"position": {
+						"0.0": {
+							"post": [-2.17, -2.5, -2.05],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-2.17, -2.5, -2.05],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				}
+			}
+		},
 		"run_upper": {
 			"loop": true,
 			"animation_length": 0.6,

@@ -2,6 +2,8 @@ package com.tacz.guns.client.event;
 
 import cn.sh1rocu.simplebedrockmodel.api.event.RenderTickEvent;
 import com.tacz.guns.api.TimelessAPI;
+import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
 import net.fabricmc.api.EnvType;
@@ -29,7 +31,11 @@ public class TickAnimationEvent {
                 animationStateMachine.trigger(GunAnimationConstant.INPUT_IDLE);
                 return;
             }
-            if (!player.isMovingSlowly() && player.isSprinting()) {
+            IGun iGun = IGun.getIGunOrNull(mainHandItem);
+            boolean isSafe = iGun != null && iGun.getFireMode(mainHandItem) == com.tacz.guns.api.item.gun.FireMode.SAFE;
+            if (isSafe) {
+                animationStateMachine.trigger(GunAnimationConstant.INPUT_RUN);
+            } else if (!player.isMovingSlowly() && player.isSprinting()) {
                 // 如果玩家正在移动，播放移动动画，否则播放 idle 动画
                 animationStateMachine.trigger(GunAnimationConstant.INPUT_RUN);
             } else if (!player.isMovingSlowly() && player.input.getMoveVector().length() > 0.01) {

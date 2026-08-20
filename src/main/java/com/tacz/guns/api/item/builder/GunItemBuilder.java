@@ -8,6 +8,8 @@ import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.item.gun.GunItemManager;
 import com.tacz.guns.init.ModItems;
+import com.tacz.guns.resource.index.CommonGunIndex;
+import com.tacz.guns.resource.pojo.data.gun.GunData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 
@@ -102,8 +104,16 @@ public final class GunItemBuilder {
 
         ItemStack gun = new ItemStack(gunItemRegistryObject, this.count);
         if (gun.getItem() instanceof IGun iGun) {
+            FireMode mode = this.fireMode;
+            if (mode == FireMode.UNKNOWN && this.gunId != null) {
+                mode = TimelessAPI.getCommonGunIndex(this.gunId)
+                        .map(CommonGunIndex::getGunData)
+                        .map(GunData::getFireModeSet)
+                        .flatMap(list -> list.stream().filter(m -> m != FireMode.SAFE).findFirst())
+                        .orElse(FireMode.SAFE);
+            }
             iGun.setGunId(gun, this.gunId);
-            iGun.setFireMode(gun, this.fireMode);
+            iGun.setFireMode(gun, mode);
             iGun.setCurrentAmmoCount(gun, this.ammoCount);
             iGun.setBulletInBarrel(gun, this.bulletInBarrel);
             this.attachments.forEach((type, id) -> {

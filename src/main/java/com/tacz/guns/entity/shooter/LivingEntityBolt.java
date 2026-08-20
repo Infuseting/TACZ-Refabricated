@@ -3,6 +3,7 @@ package com.tacz.guns.entity.shooter;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.resource.index.CommonGunIndex;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
 import net.minecraft.resources.ResourceLocation;
@@ -30,6 +31,9 @@ public class LivingEntityBolt {
         }
         ItemStack currentGunItem = data.currentGunItem.get();
         if (!(currentGunItem.getItem() instanceof AbstractGunItem iGun)) {
+            return;
+        }
+        if (iGun.getFireMode(currentGunItem) == FireMode.SAFE) {
             return;
         }
         ResourceLocation gunId = iGun.getGunId(currentGunItem);

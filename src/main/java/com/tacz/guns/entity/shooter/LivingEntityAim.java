@@ -5,6 +5,7 @@ import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.nbt.AttachmentItemDataAccessor;
 import com.tacz.guns.resource.index.CommonGunIndex;
@@ -27,6 +28,11 @@ public class LivingEntityAim {
     }
 
     public void aim(boolean isAim) {
+        if (data.currentGunItem != null && data.currentGunItem.get().getItem() instanceof IGun iGun) {
+            if (iGun.getFireMode(data.currentGunItem.get()) == FireMode.SAFE) {
+                isAim = false;
+            }
+        }
         data.isAiming = isAim;
     }
 

@@ -6,6 +6,7 @@ import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.builder.AmmoItemBuilder;
 import com.tacz.guns.api.item.builder.AttachmentItemBuilder;
 import com.tacz.guns.api.item.builder.GunItemBuilder;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.resource.pojo.data.block.TabConfig;
 import com.tacz.guns.resource.pojo.data.recipe.GunResult;
 import net.minecraft.nbt.CompoundTag;
@@ -77,13 +78,14 @@ public class RawGunTableResult {
         }
 
         return TimelessAPI.getCommonGunIndex(id).map(gunIndex -> {
+            FireMode initialMode = gunIndex.getGunData().getFireModeSet().stream().filter(m -> m != FireMode.SAFE).findFirst().orElse(FireMode.SAFE);
             ItemStack itemStack = GunItemBuilder.create()
                     .setCount(count)
                     .setId(id)
                     .setAmmoCount(ammoCount)
                     .setAmmoInBarrel(false)
                     .putAllAttachment(attachments)
-                    .setFireMode(gunIndex.getGunData().getFireModeSet().get(0)).build();
+                    .setFireMode(initialMode).build();
             String raw = gunIndex.getType();
             if (!raw.contains(":")) {
                 raw = GunMod.MOD_ID + ":" + raw;

@@ -97,6 +97,9 @@ public class AnimationManager {
 
     public static void playLoopUpperAnimation(AbstractClientPlayer player, GunDisplayInstance display, float limbSwingAmount) {
         IGunOperator operator = IGunOperator.fromLivingEntity(player);
+        ItemStack mainHand = player.getMainHandItem();
+        IGun iGun = IGun.getIGunOrNull(mainHand);
+        boolean isSafe = iGun != null && iGun.getFireMode(mainHand) == com.tacz.guns.api.item.gun.FireMode.SAFE;
         float aimingProgress = operator.getSynAimingProgress();
         if (aimingProgress <= 0) {
             // 疾跑时播放的动画
@@ -107,6 +110,18 @@ public class AnimationManager {
                     playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.CROUCH_WALK_UPPER);
                 } else {
                     playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.RUN_UPPER);
+                }
+                return;
+            }
+
+            // 保险模式时播放的动画 (仅手臂保持下垂持枪姿势，躯干不晃动)
+            if (isSafe) {
+                if (isPlayerLie(player)) {
+                    playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.LIE);
+                } else if (player.getPose() == Pose.CROUCHING) {
+                    playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.CROUCH_WALK_UPPER);
+                } else {
+                    playLoopAnimation(player, display, PlayerAnimatorCompat.LOOP_UPPER_ANIMATION, AnimationName.SAFE_UPPER);
                 }
                 return;
             }

@@ -43,8 +43,16 @@ public class InnerThirdPersonManager {
 
     private static void playVanillaAnimation(LivingEntity entityIn, ModelPart rightArm, ModelPart leftArm, ModelPart body, ModelPart head, IGunOperator operator, GunDisplayInstance display) {
         String animation = display.getThirdPersonAnimation();
+        ItemStack mainHand = entityIn.getMainHandItem();
+        IGun iGun = IGun.getIGunOrNull(mainHand);
+        boolean isSafe = iGun != null && iGun.getFireMode(mainHand) == com.tacz.guns.api.item.gun.FireMode.SAFE;
         float aimingProgress = operator.getSynAimingProgress();
-        if (aimingProgress <= 0) {
+        if (isSafe) {
+            rightArm.yRot = -0.5F + head.yRot * 0.5f;
+            leftArm.yRot = 0.6F + head.yRot * 0.5f;
+            rightArm.xRot = -0.7F;
+            leftArm.xRot = -0.7F;
+        } else if (aimingProgress <= 0) {
             ThirdPersonManager.getAnimation(animation).animateGunHold(entityIn, rightArm, leftArm, body, head);
         } else {
             ThirdPersonManager.getAnimation(animation).animateGunAim(entityIn, rightArm, leftArm, body, head, aimingProgress);

@@ -19,6 +19,11 @@ public enum FireMode {
     @SerializedName("burst")
     BURST,
     /**
+     * 保险模式 (Safe)
+     */
+    @SerializedName("safe")
+    SAFE,
+    /**
      * 未知的其他情况？
      */
     @SerializedName("unknown")

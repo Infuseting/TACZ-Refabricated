@@ -517,6 +517,56 @@
 				}
 			}
 		},
+		"safe_upper": {
+			"loop": true,
+			"animation_length": 1.0,
+			"bones": {
+				"right_arm": {
+					"rotation": {
+						"0.0": {
+							"post": [-101.97, -56.375, 12],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-101.97, -56.375, 12],
+							"lerp_mode": "catmullrom"
+						}
+					},
+					"position": {
+						"0.0": {
+							"post": [-0.42, -2.2, -3.455],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-0.42, -2.2, -3.455],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				},
+				"left_arm": {
+					"rotation": {
+						"0.0": {
+							"post": [-91.4, -11.635, -17.69],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-91.4, -11.635, -17.69],
+							"lerp_mode": "catmullrom"
+						}
+					},
+					"position": {
+						"0.0": {
+							"post": [-0.225, -1.55, -1.675],
+							"lerp_mode": "catmullrom"
+						},
+						"1.0": {
+							"post": [-0.225, -1.55, -1.675],
+							"lerp_mode": "catmullrom"
+						}
+					}
+				}
+			}
+		},
 		"run_upper": {
 			"loop": true,
 			"animation_length": 0.6,

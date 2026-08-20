@@ -1,4 +1,4 @@
-﻿{
+{
     "toast.tacz.level_up":  "Level Up!",
     "toast.tacz.sub.level_up":  "This weapon works better",
     "toast.tacz.sub.damage_up":  "Weapons become more deadly",
@@ -91,6 +91,7 @@
     "gui.tacz.gun_refit.property_diagrams.auto":  "AUTO",
     "gui.tacz.gun_refit.property_diagrams.semi":  "SEMI",
     "gui.tacz.gun_refit.property_diagrams.burst":  "BURST",
+    "gui.tacz.gun_refit.property_diagrams.safe":  "SAFE",
     "gui.tacz.gun_refit.property_diagrams.unknown":  "UNKNOWN",
     "gui.tacz.gun_refit.property_diagrams.effective_range":  "Eff.Range",
     "gui.tacz.gun_refit.property_diagrams.aim_inaccuracy":  "Accuracy",

@@ -5,6 +5,7 @@ import com.tacz.guns.api.DefaultAssets;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.event.common.GunMeleeEvent;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.api.item.attachment.AttachmentType;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
 import com.tacz.guns.network.NetworkHandler;
@@ -48,6 +49,9 @@ public class LivingEntityMelee {
             return;
         }
         ItemStack currentGunItem = data.currentGunItem.get();
+        if (currentGunItem.getItem() instanceof IGun iGun && iGun.getFireMode(currentGunItem) == FireMode.SAFE) {
+            return;
+        }
         // 触发近战事件
         GunMeleeEvent gunMeleeEvent = new GunMeleeEvent(shooter, currentGunItem, LogicalSide.SERVER);
         GunMeleeEvent.CALLBACK.invoker().post(gunMeleeEvent);

@@ -2,6 +2,7 @@ package com.tacz.guns.client.gameplay;
 
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.client.animation.statemachine.GunAnimationConstant;
 import com.tacz.guns.client.renderer.item.AnimateGeoItemRenderer;
 import com.tacz.guns.client.resource.index.ClientGunIndex;
@@ -29,6 +30,9 @@ public class LocalPlayerInspect {
             if (BuiltinItemRendererRegistry.INSTANCE.get(mainHandItem.getItem()) instanceof AnimateGeoItemRenderer<?, ?> renderer) {
                 renderer.triggerAnimation(mainHandItem, GunAnimationConstant.INPUT_INSPECT);
             }
+            return;
+        }
+        if (iGun.getFireMode(mainHandItem) == FireMode.SAFE) {
             return;
         }
         // 检查状态锁

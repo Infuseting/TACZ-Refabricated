@@ -396,8 +396,10 @@ function movement_track_states.run.update(this, context)
         context:anchorWalkDist() -- 打 walkDist 锚点，确保 run 动画的起点一致
     end
     if (state.mode ~= -1) then
-        if (not context:isOnGround()) then
-            -- 如果玩家在空中，则播放 run_hold 动画以稳定枪身
+        local isSafe = context.isSafe and context:isSafe()
+        local isSprinting = context.isSprinting and context:isSprinting()
+        if (not context:isOnGround() or (isSafe and not isSprinting)) then
+            -- 如果玩家在空中，或者处于保险模式且未在真实冲刺，则播放 run_hold 动画以稳定枪身
             if (state.mode ~= 1) then
                 state.mode = 1
                 context:runAnimation("run_hold", track, true, LOOP, 0.6)
@@ -416,6 +418,10 @@ end
 
 -- 转出奔跑态
 function movement_track_states.run.transition(this, context, input)
+    -- 如果当前处于保险模式且没有主轨道高优先级动作打断，保持在奔跑态
+    if (context.isSafe and context:isSafe() and context:isStopped(context:getTrack(STATIC_TRACK_LINE, MAIN_TRACK))) then
+        return nil
+    end
     -- 收到闲置输入则转去闲置态
     if (input == INPUT_IDLE) then
         return this.movement_track_states.idle

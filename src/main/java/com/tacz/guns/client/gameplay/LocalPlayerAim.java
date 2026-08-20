@@ -3,6 +3,7 @@ package com.tacz.guns.client.gameplay;
 import com.tacz.guns.api.TimelessAPI;
 import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.item.IGun;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.network.message.ClientMessagePlayerAim;
 import com.tacz.guns.resource.modifier.custom.AdsModifier;
 import com.tacz.guns.resource.pojo.data.gun.GunData;
@@ -27,11 +28,15 @@ public class LocalPlayerAim {
         if (!(mainHandItem.getItem() instanceof IGun iGun)) {
             return;
         }
+        if (iGun.getFireMode(mainHandItem) == FireMode.SAFE) {
+            isAim = false;
+        }
         ResourceLocation gunId = iGun.getGunId(mainHandItem);
+        boolean finalIsAim = isAim;
         TimelessAPI.getClientGunIndex(gunId).ifPresent(gunIndex -> {
-            data.clientIsAiming = isAim;
+            data.clientIsAiming = finalIsAim;
             // 发送切换开火模式的数据包，通知服务器
-            ClientPlayNetworking.send(new ClientMessagePlayerAim(isAim));
+            ClientPlayNetworking.send(new ClientMessagePlayerAim(finalIsAim));
         });
     }
 
@@ -40,6 +45,10 @@ public class LocalPlayerAim {
     }
 
     public boolean isAim() {
+        ItemStack mainHandItem = player.getMainHandItem();
+        if (mainHandItem.getItem() instanceof IGun iGun && iGun.getFireMode(mainHandItem) == FireMode.SAFE) {
+            return false;
+        }
         return data.clientIsAiming;
     }
 
@@ -50,6 +59,9 @@ public class LocalPlayerAim {
             data.clientAimingProgress = 0;
             LocalPlayerDataHolder.oldAimingProgress = 0;
             return;
+        }
+        if (iGun.getFireMode(mainHandItem) == FireMode.SAFE) {
+            data.clientIsAiming = false;
         }
         // 如果正在收枪，则不能瞄准
         if (System.currentTimeMillis() - data.clientDrawTimestamp < 0) {

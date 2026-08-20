@@ -532,9 +532,10 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
             String key = type.name().toLowerCase(Locale.US);
             String indexType = index.getType();
             if (key.equals(indexType)) {
+                FireMode initialMode = gunData.getFireModeSet().stream().filter(m -> m != FireMode.SAFE).findFirst().orElse(FireMode.SAFE);
                 ItemStack itemStack = GunItemBuilder.create()
                         .setId(entry.getKey())
-                        .setFireMode(gunData.getFireModeSet().get(0))
+                        .setFireMode(initialMode)
                         .setAmmoCount(gunData.getAmmoAmount())
                         .setHeatData(gunData.hasHeatData())
                         .setAmmoInBarrel(true)

@@ -255,6 +255,15 @@ public class GunAnimationStateContext extends ItemAnimationStateContext {
     }
 
     /**
+     * 获取当前枪械是否处于保险 (SAFE) 模式
+     *
+     * @return 处于保险模式则返回 true
+     */
+    public boolean isSafe() {
+        return processGunData((iGun, gunIndex) -> iGun.getFireMode(currentGunItem) == FireMode.SAFE).orElse(false);
+    }
+
+    /**
      * 获取持枪玩家的瞄准进度。
      *
      * @return 持枪玩家的瞄准进度，取值范围：0 ~ 1。
@@ -357,6 +366,23 @@ public class GunAnimationStateContext extends ItemAnimationStateContext {
      */
     public boolean isOnGround() {
         return processCameraEntity(Entity::onGround).orElse(false);
+    }
+
+    /**
+     * 获取玩家当前是否正在疾跑
+     *
+     * @return 玩家当前是否正在疾跑
+     */
+    public boolean isSprinting() {
+        return processCameraEntity(entity -> {
+            if (entity instanceof net.minecraft.client.player.LocalPlayer localPlayer) {
+                return localPlayer.isSprinting() && !localPlayer.isMovingSlowly();
+            }
+            if (entity instanceof LivingEntity livingEntity) {
+                return livingEntity.isSprinting();
+            }
+            return false;
+        }).orElse(false);
     }
 
     /**

@@ -225,6 +225,10 @@ public class GunData {
         return fireModeSet;
     }
 
+    public void setFireModeSet(List<FireMode> fireModeSet) {
+        this.fireModeSet = fireModeSet;
+    }
+
     public BurstData getBurstData() {
         return burstData;
     }

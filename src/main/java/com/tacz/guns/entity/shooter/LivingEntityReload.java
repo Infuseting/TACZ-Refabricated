@@ -6,6 +6,7 @@ import com.tacz.guns.api.entity.IGunOperator;
 import com.tacz.guns.api.entity.ReloadState;
 import com.tacz.guns.api.event.common.GunReloadEvent;
 import com.tacz.guns.api.item.gun.AbstractGunItem;
+import com.tacz.guns.api.item.gun.FireMode;
 import com.tacz.guns.network.NetworkHandler;
 import com.tacz.guns.network.message.event.ServerMessageGunReload;
 import com.tacz.guns.resource.pojo.data.gun.Bolt;
@@ -32,6 +33,9 @@ public class LivingEntityReload {
         }
         ItemStack currentGunItem = data.currentGunItem.get();
         if (!(currentGunItem.getItem() instanceof AbstractGunItem gunItem)) {
+            return;
+        }
+        if (gunItem.getFireMode(currentGunItem) == FireMode.SAFE) {
             return;
         }
         ResourceLocation gunId = gunItem.getGunId(currentGunItem);

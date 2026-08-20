@@ -37,6 +37,7 @@ public class GunHudOverlay {
     private static final ResourceLocation SEMI = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_semi.png");
     private static final ResourceLocation AUTO = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_auto.png");
     private static final ResourceLocation BURST = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_burst.png");
+    private static final ResourceLocation SAFE = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_safe.png");
     private static final ResourceLocation HEATBAR = new ResourceLocation(GunMod.MOD_ID, "textures/hud/heat_bar.png");
     private static final ResourceLocation HEATBASE = new ResourceLocation(GunMod.MOD_ID, "textures/hud/heat_base.png");
 
@@ -179,6 +180,7 @@ public class GunHudOverlay {
         ResourceLocation fireModeTexture = switch (fireMode) {
             case AUTO -> AUTO;
             case BURST -> BURST;
+            case SAFE -> SAFE;
             default -> SEMI;
         };
         RenderSystem.setShaderColor(1, 1, 1, 1);

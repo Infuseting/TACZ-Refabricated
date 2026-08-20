@@ -41,6 +41,9 @@ public class ShootKey {
         ItemStack mainHandItem = player.getMainHandItem();
         if (mainHandItem.getItem() instanceof IGun iGun) {
             FireMode fireMode = iGun.getFireMode(mainHandItem);
+            if (fireMode == FireMode.SAFE) {
+                return;
+            }
             boolean isBurstAuto = fireMode == FireMode.BURST && TimelessAPI.getCommonGunIndex(iGun.getGunId(mainHandItem))
                     .map(index -> index.getGunData().getBurstData().isContinuousShoot())
                     .orElse(false);

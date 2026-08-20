@@ -54,6 +54,9 @@ public class LivingEntityShoot {
             return ShootResult.NOT_GUN;
         }
         ResourceLocation gunId = iGun.getGunId(currentGunItem);
+        if (iGun.getFireMode(currentGunItem) == FireMode.SAFE) {
+            return ShootResult.NOT_GUN;
+        }
         Optional<CommonGunIndex> gunIndexOptional = TimelessAPI.getCommonGunIndex(gunId);
         if (gunIndexOptional.isEmpty()) {
             return ShootResult.ID_NOT_EXIST;
