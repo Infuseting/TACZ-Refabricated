@@ -43,6 +43,9 @@ public class ClientMessagePlayerShoot implements FabricPacket {
     }
 
     public void handle(ServerPlayer player, PacketSender responseSender) {
+        if (com.tacz.guns.server.ServerPlayerProtectionHandler.isProtected(player)) {
+            return;
+        }
         IGunOperator.fromLivingEntity(player).shoot(player::getXRot, player::getYRot, timestamp, chargeProgress);
     }
 }

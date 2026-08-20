@@ -31,6 +31,9 @@ public class ClientMessagePlayerReloadGun implements FabricPacket {
     }
 
     public void handle(ServerPlayer player, PacketSender responseSender) {
+        if (com.tacz.guns.server.ServerPlayerProtectionHandler.isProtected(player)) {
+            return;
+        }
         IGunOperator.fromLivingEntity(player).reload();
     }
 }

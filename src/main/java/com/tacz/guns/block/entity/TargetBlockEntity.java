@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
@@ -29,7 +30,7 @@ import static com.tacz.guns.block.TargetBlock.OUTPUT_POWER;
 import static com.tacz.guns.block.TargetBlock.STAND;
 
 public class TargetBlockEntity extends BlockEntity implements Nameable {
-    public static final BlockEntityType<TargetBlockEntity> TYPE = BlockEntityType.Builder.of(TargetBlockEntity::new, ModBlocks.TARGET).build(null);
+    public static final BlockEntityType<TargetBlockEntity> TYPE = FabricBlockEntityTypeBuilder.create(TargetBlockEntity::new, ModBlocks.TARGET).build();
     /**
      * 标靶复位时间，暂定为 5 秒
      */

@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.fabricmc.fabric.api.object.builder.v1.block.entity.FabricBlockEntityTypeBuilder;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import static com.tacz.guns.block.StatueBlock.FACING;
 
 public class StatueBlockEntity extends BlockEntity {
-    public static final BlockEntityType<StatueBlockEntity> TYPE = BlockEntityType.Builder.of(StatueBlockEntity::new, ModBlocks.STATUE).build(null);
+    public static final BlockEntityType<StatueBlockEntity> TYPE = FabricBlockEntityTypeBuilder.create(StatueBlockEntity::new, ModBlocks.STATUE).build();
     private static final String ITEM_TAG = "Item";
     private ItemStack gunItem = ItemStack.EMPTY;
 

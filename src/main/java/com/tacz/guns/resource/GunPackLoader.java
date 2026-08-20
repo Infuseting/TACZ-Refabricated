@@ -49,10 +49,25 @@ public enum GunPackLoader implements RepositorySource {
     private static final Marker MARKER = MarkerFactory.getMarker("GunPackFinder");
     public PackType packType;
     private boolean firstLoad = true;
+    private PackResources securePackResources = null;
 
+    public void setSecurePackResources(PackResources securePackResources) {
+        this.securePackResources = securePackResources;
+    }
+
+    public PackResources getSecurePackResources() {
+        return this.securePackResources;
+    }
 
     @Override
     public void loadPacks(Consumer<Pack> pOnLoad) {
+        if (securePackResources != null) {
+            Pack securePack = Pack.readMetaAndCreate("tacz_secure_server_pack", Component.literal("TACZ Secure Server Pack"), true,
+                    (id) -> securePackResources, packType, Pack.Position.TOP, PackSource.BUILT_IN);
+            if (securePack != null) {
+                pOnLoad.accept(securePack);
+            }
+        }
         Pack extensionsPack = discoverExtensions();
         if (extensionsPack != null) {
             pOnLoad.accept(extensionsPack);

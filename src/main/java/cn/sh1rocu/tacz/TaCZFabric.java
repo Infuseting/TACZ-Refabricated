@@ -85,7 +85,10 @@ public class TaCZFabric implements ModInitializer {
         ServerLifecycleEvents.SERVER_STOPPED.register(CommonAssetsManager::onServerStopped);
         ServerLifecycleEvents.SYNC_DATA_PACK_CONTENTS.register(CommonAssetsManager::OnDatapackSync);
 
-        ServerLifecycleEvents.SERVER_STARTED.register(server -> CommonRegistry.onLoadComplete());
+        ServerLifecycleEvents.SERVER_STARTED.register(server -> {
+            CommonRegistry.onLoadComplete();
+            com.tacz.guns.security.GunPackSecurityManager.getInstance().initializeServerPacks();
+        });
 
         AmmoHitBlockEvent.CALLBACK.register(BellRing::onAmmoHitBlock);
 
@@ -93,8 +96,19 @@ public class TaCZFabric implements ModInitializer {
 
         LivingHurtEvent.CALLBACK.register(LOW, EntityDamageEvent::onLivingHurt);
 
-        PlayerTickEvent.END.register(HitboxHelperEvent::onPlayerTick);
-        PlayerEvent.LOGGED_OUT.register(HitboxHelperEvent::onPlayerLoggedOut);
+        PlayerTickEvent.END.register(event -> {
+            HitboxHelperEvent.onPlayerTick(event);
+            if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.tacz.guns.server.ServerPlayerProtectionHandler.onPlayerTick(sp);
+            }
+        });
+        PlayerEvent.LOGGED_OUT.register(event -> {
+            HitboxHelperEvent.onPlayerLoggedOut(event);
+            if (event.getEntity() instanceof net.minecraft.server.level.ServerPlayer sp) {
+                com.tacz.guns.security.GunPackSecurityManager.getInstance().onPlayerLoggedOut(sp);
+                fr.infuseting.tacz.network.RateLimiter.onPlayerLoggedOut(sp);
+            }
+        });
 
         LivingKnockBackEvent.CALLBACK.register(KnockbackChange::onKnockback);
 
@@ -105,8 +119,14 @@ public class TaCZFabric implements ModInitializer {
 
         AttackBlockCallback.EVENT.register(PreventGunClick::onLeftClickBlock);
 
-        ServerTickEvents.START_SERVER_TICK.register(ServerTickEvent::onServerTick);
-        ServerTickEvents.END_SERVER_TICK.register(ServerTickEvent::onServerTick);
+        ServerTickEvents.START_SERVER_TICK.register(server -> {
+            ServerTickEvent.onServerTick(server);
+            com.tacz.guns.security.GunPackSecurityManager.getInstance().onServerTickStart();
+        });
+        ServerTickEvents.END_SERVER_TICK.register(server -> {
+            ServerTickEvent.onServerTick(server);
+            com.tacz.guns.security.GunPackSecurityManager.getInstance().onServerTickEnd(server);
+        });
 
         EntityJoinLevelEvent.CALLBACK.register(SyncBaseTimestamp::onPlayerJoinWorld);
 

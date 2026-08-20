@@ -108,6 +108,54 @@ public class ScriptManager extends SimplePreparableReloadListener<List<Map.Entry
         return scriptMap.get(getModuleName(id));
     }
 
+    public void loadFromReader(ResourceLocation id, Reader reader) {
+        if (globals == null) {
+            initGlobals();
+        }
+        try {
+            String moduleName = getModuleName(id);
+            LuaValue chunk = globals.load(reader, moduleName);
+            LuaTable table = chunk.call().checktable(1);
+            if (table != null) {
+                scriptMap.put(moduleName, table);
+            }
+        } catch (Exception e) {
+            GunMod.LOGGER.warn(MARKER, "Failed to load direct script: {}", id, e);
+        }
+    }
+
+    /**
+     * Registers a script in {@code package.preload} without evaluating it yet.
+     * Call this for every script before calling {@link #loadFromReader} so that
+     * {@code require()} can find sibling modules during evaluation.
+     */
+    public void preloadScript(ResourceLocation id, byte[] luaBytes) {
+        if (globals == null) {
+            initGlobals();
+        }
+        String moduleName = getModuleName(id);
+        globals.get("package").get("preload").set(moduleName, new LuaFunction() {
+            private LuaTable cached = null;
+
+            @Override
+            public LuaValue call(LuaValue modname, LuaValue env) {
+                if (cached != null) return cached;
+                try (Reader reader = new java.io.InputStreamReader(
+                        new java.io.ByteArrayInputStream(luaBytes), java.nio.charset.StandardCharsets.UTF_8)) {
+                    LuaValue chunk = globals.load(reader, moduleName);
+                    cached = chunk.call().checktable(1);
+                    if (cached != null) {
+                        scriptMap.put(moduleName, cached);
+                    }
+                    return cached != null ? cached : LuaValue.NIL;
+                } catch (Exception e) {
+                    GunMod.LOGGER.warn(MARKER, "Failed to preload script: {}", id, e);
+                    return LuaValue.NIL;
+                }
+            }
+        });
+    }
+
     private static Globals secureStandardGlobals() {
         Globals globals = new Globals();
         globals.load(new JseBaseLib());

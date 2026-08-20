@@ -17,6 +17,8 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.player.Player;
@@ -35,10 +37,10 @@ import org.jetbrains.annotations.Nullable;
 import static net.minecraft.world.entity.vehicle.AbstractMinecart.Type.RIDEABLE;
 
 public class TargetMinecart extends AbstractMinecart implements ITargetEntity, IMinecart {
-    public static EntityType<TargetMinecart> TYPE = EntityType.Builder.<TargetMinecart>of(TargetMinecart::new, MobCategory.MISC)
-            .sized(0.75F, 2.4F)
-            .clientTrackingRange(8)
-            .build("target_minecart");
+    public static EntityType<TargetMinecart> TYPE = FabricEntityTypeBuilder.<TargetMinecart>create(MobCategory.MISC, TargetMinecart::new)
+            .dimensions(EntityDimensions.scalable(0.75F, 2.4F))
+            .trackRangeBlocks(8)
+            .build();
 
     private @Nullable GameProfile gameProfile = null;
 

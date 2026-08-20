@@ -38,6 +38,8 @@ public class NetworkHandler {
         ServerPlayNetworking.registerGlobalReceiver(ClientMessagePlayerMelee.TYPE, ClientMessagePlayerMelee::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageSyncBaseTimestamp.TYPE, ClientMessageSyncBaseTimestamp::handle);
         ServerPlayNetworking.registerGlobalReceiver(ClientMessageLaserColor.TYPE, ClientMessageLaserColor::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageGunPackHandshake.TYPE, ClientMessageGunPackHandshake::handle);
+        ServerPlayNetworking.registerGlobalReceiver(ClientMessageGunPackAck.TYPE, ClientMessageGunPackAck::handle);
 
         HandshakeNetworking.register(AcknowledgeC2SPacket.ID, AcknowledgeC2SPacket.class);
         HandshakeNetworking.register(SyncedEntityDataMappingS2CPacket.TYPE, SyncedEntityDataMappingS2CPacket.class);
@@ -73,6 +75,9 @@ public class NetworkHandler {
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunReload.TYPE, ServerMessageGunReload::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunShoot.TYPE, ServerMessageGunShoot::handle);
         ClientPlayNetworking.registerGlobalReceiver(ServerMessageSyncBaseTimestamp.TYPE, ServerMessageSyncBaseTimestamp::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunPackHandshake.TYPE, ServerMessageGunPackHandshake::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunPackChunk.TYPE, ServerMessageGunPackChunk::handle);
+        ClientPlayNetworking.registerGlobalReceiver(ServerMessageGunPackKey.TYPE, ServerMessageGunPackKey::handle);
     }
 
     @SuppressWarnings("UnstableApiUsage")

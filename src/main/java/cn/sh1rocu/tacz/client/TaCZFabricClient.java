@@ -62,6 +62,12 @@ public class TaCZFabricClient implements ClientModInitializer {
         InputEvent.InteractionKeyMappingTriggered.EVENT.register(ClientPreventGunClick::onClickInput);
 
         ClientPlayConnectionEvents.DISCONNECT.register(CommonNetworkCacheEvent::onClientPlayerLoggingIn);
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            if (com.tacz.guns.resource.GunPackLoader.INSTANCE.getSecurePackResources() instanceof com.tacz.guns.client.resource.EncryptedPackResources enc) {
+                enc.destroy();
+                com.tacz.guns.resource.GunPackLoader.INSTANCE.setSecurePackResources(null);
+            }
+        });
 
         // RenderHandEvent.EVENT.register(FirstPersonRenderEvent::onRenderHand);
 

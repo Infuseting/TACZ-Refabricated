@@ -204,6 +204,14 @@ public class LazyJsonDataManager<T> extends SimplePreparableReloadListener<LazyJ
         return dataMap;
     }
 
+    public void putCustomData(ResourceLocation id, T data) {
+        if (id != null && data != null) {
+            dataMap.put(id, data);
+            allResourceIds.add(id);
+            failedData.remove(id);
+        }
+    }
+
     public Set<ResourceLocation> getAllIds() {
         return allResourceIds;
     }

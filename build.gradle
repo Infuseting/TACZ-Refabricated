@@ -162,8 +162,8 @@ dependencies {
     // 性能分析工具模组
     modRuntimeOnly "curse.maven:spark-361579:4738953"
     // 假人，测试近战伤害
-    modRuntimeOnly "curse.maven:selene-499980:6902843"
-    modRuntimeOnly "curse.maven:mmmmmmmmmmmm-225738:6826546"
+    // modRuntimeOnly "curse.maven:selene-499980:6902843"
+    // modRuntimeOnly "curse.maven:mmmmmmmmmmmm-225738:6826546"
     // 手柄按键支持
     modCompileOnly "curse.maven:framework-549225:6531429"
     modCompileOnly("curse.maven:controllable-317269:6171420")

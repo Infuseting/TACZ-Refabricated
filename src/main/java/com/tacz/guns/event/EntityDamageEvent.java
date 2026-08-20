@@ -8,6 +8,14 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 
 public class EntityDamageEvent {
     public static void onLivingHurt(LivingHurtEvent event) {
+        if (com.tacz.guns.server.ServerPlayerProtectionHandler.isProtected(event.getEntity())) {
+            event.setCanceled(true);
+            return;
+        }
+        if (event.getSource().getEntity() != null && com.tacz.guns.server.ServerPlayerProtectionHandler.isProtected(event.getSource().getEntity())) {
+            event.setCanceled(true);
+            return;
+        }
         if (event.getSource().is(ModDamageTypes.BULLETS_TAG)) {
             LivingEntity living = event.getEntity();
 

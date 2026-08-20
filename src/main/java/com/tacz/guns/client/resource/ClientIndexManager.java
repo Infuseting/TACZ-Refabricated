@@ -54,6 +54,9 @@ public class ClientIndexManager {
         loadBlockIndex();
         warmUpInventoryModels();
 
+        GunMod.LOGGER.info("[ClientIndexManager] Client index reloaded: {} guns, {} ammo, {} attachments, {} blocks, {} gun displays.",
+                GUN_INDEX.size(), AMMO_INDEX.size(), ATTACHMENT_INDEX.size(), BLOCK_INDEX.size(), GUN_DISPLAY.size());
+
         LocalPlayer player = Minecraft.getInstance().player;
         if (player != null && IGun.mainHandHoldGun(player)) {
             AttachmentPropertyManager.postChangeEvent(player, player.getMainHandItem());

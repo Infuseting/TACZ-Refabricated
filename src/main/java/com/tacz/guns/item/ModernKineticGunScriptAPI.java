@@ -318,8 +318,7 @@ public class ModernKineticGunScriptAPI {
             return 0;
         }
         long original = System.currentTimeMillis() - dataHolder.reloadTimestamp;
-        if (fr.infuseting.tacz.client.ClientReloadKeyHandler.isFastReloadActive()
-                || (itemStack != null && itemStack.hasTag() && itemStack.getTag().getBoolean("TaCZMag_FastReloadActive"))) {
+        if (itemStack != null && itemStack.hasTag() && itemStack.getTag().getBoolean("TaCZMag_FastReloadActive")) {
             return (long) (original * (1.0 / 0.75));
         }
         return original;

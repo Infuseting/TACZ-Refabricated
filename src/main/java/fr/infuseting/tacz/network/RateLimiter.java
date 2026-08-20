@@ -1,11 +1,11 @@
 package fr.infuseting.tacz.network;
 
-import me.lucko.fabric.api.permissions.v1.Permissions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -63,10 +63,22 @@ public final class RateLimiter {
         }
     }
 
+    public static void onPlayerLoggedOut(ServerPlayer player) {
+        if (player != null) {
+            UUID uuid = player.getUUID();
+            LAST_PACKET_TIME.remove(uuid);
+            LAST_ALERT_TIME.remove(uuid);
+        }
+    }
+
     public static boolean hasPermission(ServerPlayer player, String permission) {
         if (player == null) return false;
         if (FabricLoader.getInstance().isModLoaded("fabric-permissions-api-v0")) {
-            return Permissions.check(player, permission, player.hasPermissions(2));
+            try {
+                Class<?> clazz = Class.forName("me.lucko.fabric.api.permissions.v1.Permissions");
+                Method method = clazz.getMethod("check", net.minecraft.world.entity.Entity.class, String.class, boolean.class);
+                return (boolean) method.invoke(null, player, permission, player.hasPermissions(2));
+            } catch (Throwable ignored) {}
         }
         return player.hasPermissions(2);
     }

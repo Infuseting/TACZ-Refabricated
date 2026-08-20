@@ -12,6 +12,7 @@ public class ServerConfig {
     public static ForgeConfigSpec init() {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         SyncConfig.init(builder);
+        SecurityConfig.init(builder);
         SERVER_CONFIG_SPEC = builder.build();
         return SERVER_CONFIG_SPEC;
     }

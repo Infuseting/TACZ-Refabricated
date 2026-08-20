@@ -58,7 +58,10 @@ public class ServerMessageSyncGunPack implements FabricPacket {
             CommonAssetsManager.clearInstance();
         }
         CommonNetworkCache.INSTANCE.fromNetwork(message.cache);
-        // 通知客户端重新构建ClientIndex
-        ClientIndexManager.reload();
+        // On remote connections, client assets (models/textures/displays) are streamed via encrypted pack right after.
+        // Reloading ClientIndexManager now would fail because assets haven't arrived yet.
+        if (!remoteConnection) {
+            ClientIndexManager.reload();
+        }
     }
 }

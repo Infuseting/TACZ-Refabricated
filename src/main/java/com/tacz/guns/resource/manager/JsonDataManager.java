@@ -96,6 +96,12 @@ public class JsonDataManager<T> extends SimplePreparableReloadListener<Map<Resou
         return dataMap;
     }
 
+    public void putCustomData(ResourceLocation id, T data) {
+        if (id != null && data != null) {
+            dataMap.put(id, data);
+        }
+    }
+
     @Override
     public ResourceLocation getFabricId() {
         return this.ID;

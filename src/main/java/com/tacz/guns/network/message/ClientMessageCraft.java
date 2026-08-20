@@ -36,6 +36,9 @@ public class ClientMessageCraft implements FabricPacket {
     }
 
     public void handle(ServerPlayer player, PacketSender responseSender) {
+        if (com.tacz.guns.server.ServerPlayerProtectionHandler.isProtected(player)) {
+            return;
+        }
         if (player.containerMenu.containerId == menuId && player.containerMenu instanceof GunSmithTableMenu menu) {
             menu.doCraft(recipeId, player);
         }

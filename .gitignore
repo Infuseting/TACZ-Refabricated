@@ -5,6 +5,7 @@
 *.ipr
 *.iws
 bin/
+server_test/
 # IntelliJ
 out/
 # mpeltonen/sbt-idea plugin

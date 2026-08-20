@@ -37,6 +37,7 @@ import net.minecraft.client.renderer.block.model.ItemTransform;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.ItemStack;
@@ -44,6 +45,8 @@ import org.jetbrains.annotations.Nullable;
 import org.joml.Vector3f;
 import org.luaj.vm2.LuaTable;
 
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -189,6 +192,141 @@ public enum ClientAssetsManager {
             return null;
         }
         return packInfo.getData(namespace.getNamespace());
+    }
+
+    public void loadSecurePack(EncryptedPackResources pack) {
+        if (pack == null) return;
+        for (String namespace : pack.getNamespaces(PackType.CLIENT_RESOURCES)) {
+            // Gun displays
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "display/guns", (loc, io) -> {
+                try (var reader = new InputStreamReader(io.get(), StandardCharsets.UTF_8)) {
+                    String path = loc.getPath();
+                    if (path.startsWith("display/guns/")) {
+                        String sub = path.substring("display/guns/".length());
+                        if (sub.endsWith(".json")) sub = sub.substring(0, sub.length() - 5);
+                        ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                        GunDisplay display = GSON.fromJson(reader, GunDisplay.class);
+                        if (display != null && gunDisplay != null) {
+                            display.init();
+                            gunDisplay.putCustomData(id, display);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Ammo displays
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "display/ammo", (loc, io) -> {
+                try (var reader = new InputStreamReader(io.get(), StandardCharsets.UTF_8)) {
+                    String path = loc.getPath();
+                    if (path.startsWith("display/ammo/")) {
+                        String sub = path.substring("display/ammo/".length());
+                        if (sub.endsWith(".json")) sub = sub.substring(0, sub.length() - 5);
+                        ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                        AmmoDisplay display = GSON.fromJson(reader, AmmoDisplay.class);
+                        if (display != null && ammoDisplay != null) {
+                            display.init();
+                            ammoDisplay.putCustomData(id, display);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Attachment displays
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "display/attachments", (loc, io) -> {
+                try (var reader = new InputStreamReader(io.get(), StandardCharsets.UTF_8)) {
+                    String path = loc.getPath();
+                    if (path.startsWith("display/attachments/")) {
+                        String sub = path.substring("display/attachments/".length());
+                        if (sub.endsWith(".json")) sub = sub.substring(0, sub.length() - 5);
+                        ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                        AttachmentDisplay display = GSON.fromJson(reader, AttachmentDisplay.class);
+                        if (display != null && attachmentDisplay != null) {
+                            display.init();
+                            attachmentDisplay.putCustomData(id, display);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Block displays
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "display/blocks", (loc, io) -> {
+                try (var reader = new InputStreamReader(io.get(), StandardCharsets.UTF_8)) {
+                    String path = loc.getPath();
+                    if (path.startsWith("display/blocks/")) {
+                        String sub = path.substring("display/blocks/".length());
+                        if (sub.endsWith(".json")) sub = sub.substring(0, sub.length() - 5);
+                        ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                        BlockDisplay display = GSON.fromJson(reader, BlockDisplay.class);
+                        if (display != null && blockDisplay != null) {
+                            display.init();
+                            blockDisplay.putCustomData(id, display);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Bedrock models
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "geo_models", (loc, io) -> {
+                try (var reader = new InputStreamReader(io.get(), StandardCharsets.UTF_8)) {
+                    String path = loc.getPath();
+                    if (path.startsWith("geo_models/")) {
+                        String sub = path.substring("geo_models/".length());
+                        if (sub.endsWith(".json")) sub = sub.substring(0, sub.length() - 5);
+                        ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                        BedrockModelPOJO model = GSON.fromJson(reader, BedrockModelPOJO.class);
+                        if (model != null && bedrockModel != null) {
+                            bedrockModel.putCustomData(id, model);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Bedrock animations
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "animations", (loc, io) -> {
+                try (var reader = new InputStreamReader(io.get(), StandardCharsets.UTF_8)) {
+                    String path = loc.getPath();
+                    if (path.startsWith("animations/")) {
+                        String sub = path.substring("animations/".length());
+                        if (sub.endsWith(".animation.json")) {
+                            sub = sub.substring(0, sub.length() - ".animation.json".length());
+                        } else if (sub.endsWith(".json")) {
+                            sub = sub.substring(0, sub.length() - 5);
+                        }
+                        ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                        BedrockAnimationFile anim = GSON.fromJson(reader, BedrockAnimationFile.class);
+                        if (anim != null && bedrockAnimation != null) {
+                            bedrockAnimation.putCustomData(id, anim);
+                        }
+                    }
+                } catch (Exception ignored) {}
+            });
+            // Lua scripts — two-pass: register all in preload first, then evaluate
+            // Pass 1: read raw bytes and register preload entries
+            Map<ResourceLocation, byte[]> scriptBytes = new java.util.LinkedHashMap<>();
+            pack.listResources(PackType.CLIENT_RESOURCES, namespace, "scripts", (loc, io) -> {
+                if (loc.getPath().endsWith(".lua") && loc.getPath().startsWith("scripts/")) {
+                    try {
+                        scriptBytes.put(loc, io.get().readAllBytes());
+                    } catch (Exception ignored) {}
+                }
+            });
+            if (scriptManager != null && !scriptBytes.isEmpty()) {
+                // Register all scripts in package.preload so require() can find them
+                for (Map.Entry<ResourceLocation, byte[]> e : scriptBytes.entrySet()) {
+                    ResourceLocation loc = e.getKey();
+                    String sub = loc.getPath().substring("scripts/".length());
+                    if (sub.endsWith(".lua")) sub = sub.substring(0, sub.length() - 4);
+                    ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                    final byte[] data = e.getValue();
+                    scriptManager.preloadScript(id, data);
+                }
+                // Pass 2: evaluate all scripts (require() can now resolve dependencies)
+                for (Map.Entry<ResourceLocation, byte[]> e : scriptBytes.entrySet()) {
+                    ResourceLocation loc = e.getKey();
+                    String sub = loc.getPath().substring("scripts/".length());
+                    if (sub.endsWith(".lua")) sub = sub.substring(0, sub.length() - 4);
+                    ResourceLocation id = new ResourceLocation(loc.getNamespace(), sub);
+                    try (var reader = new InputStreamReader(new java.io.ByteArrayInputStream(e.getValue()), StandardCharsets.UTF_8)) {
+                        scriptManager.loadFromReader(id, reader);
+                    } catch (Exception ignored) {}
+                }
+            }
+        }
     }
 
     @Environment(EnvType.CLIENT)
