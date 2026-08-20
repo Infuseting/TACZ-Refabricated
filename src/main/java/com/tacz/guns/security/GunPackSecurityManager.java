@@ -89,6 +89,7 @@ public class GunPackSecurityManager {
             byte[] compressedBytes = GunPackCryptoUtil.compressGzip(zipBytes);
 
             this.sessionKey = GunPackCryptoUtil.generateKey();
+            this.sessionIv = GunPackCryptoUtil.generateIv();
             byte[] encryptedBundle = GunPackCryptoUtil.encrypt(compressedBytes, sessionKey, sessionIv);
             this.currentSha256 = GunPackCryptoUtil.sha256Hex(encryptedBundle);
             this.totalSize = encryptedBundle.length;
