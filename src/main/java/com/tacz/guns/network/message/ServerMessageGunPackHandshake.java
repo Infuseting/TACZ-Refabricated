@@ -51,6 +51,9 @@ public class ServerMessageGunPackHandshake implements FabricPacket {
 
     @Environment(EnvType.CLIENT)
     public void handle(LocalPlayer player, PacketSender responseSender) {
+        if (player.connection.getConnection() != null && player.connection.getConnection().isMemoryConnection()) {
+            return;
+        }
         Minecraft mc = Minecraft.getInstance();
         mc.execute(() -> {
             boolean hasCache = GunPackClientCacheManager.hasValidCache(sha256);

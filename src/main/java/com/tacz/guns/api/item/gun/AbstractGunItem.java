@@ -120,6 +120,10 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     private static final ThreadLocal<LivingEntity> CURRENT_SHOOTER = new ThreadLocal<>();
 
+    public static void setThreadLocalShooter(LivingEntity shooter) {
+        CURRENT_SHOOTER.set(shooter);
+    }
+
     private static CommonGunIndex getManagedGunIndex(AbstractGunItem gunItem, ItemStack gun) {
         ResourceLocation gunId = gunItem.getGunId(gun);
         CommonGunIndex index = TimelessAPI.getCommonGunIndex(gunId).orElse(null);
@@ -362,12 +366,13 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
         fr.infuseting.tacz.magazine.GunMagazineInitializer.ensureMagazineForLoadedGun(gunItem);
         CommonGunIndex managedIndex = getManagedGunIndex(this, gunItem);
         if (managedIndex != null) {
-            if (fr.infuseting.tacz.client.ClientReloadKeyHandler.isSelectorOpen()) {
-                return 0;
-            }
-
             LivingEntity shooter = CURRENT_SHOOTER.get();
             CURRENT_SHOOTER.remove();
+
+            if (shooter instanceof net.minecraft.server.level.ServerPlayer serverPlayer
+                    && fr.infuseting.tacz.network.OpenSelectorPacket.SELECTING_PLAYERS.contains(serverPlayer.getUUID())) {
+                return 0;
+            }
 
             boolean isFastReload = gunItem.hasTag() && gunItem.getTag().getBoolean("TaCZMag_FastReload");
             if (gunItem.hasTag()) gunItem.getTag().remove("TaCZMag_FastReload");

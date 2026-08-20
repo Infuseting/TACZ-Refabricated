@@ -276,7 +276,9 @@ public class CommonAssetsManager implements ICommonResourceProvider {
         }
         ServerMessageSyncGunPack message = new ServerMessageSyncGunPack(getInstance().getNetworkCache());
         NetworkHandler.sendToClientPlayer(message, player);
-        com.tacz.guns.security.GunPackSecurityManager.getInstance().onPlayerJoin(player);
+        if (player.server != null && player.server.isDedicatedServer()) {
+            com.tacz.guns.security.GunPackSecurityManager.getInstance().onPlayerJoin(player);
+        }
     }
 
     public static void reloadAllPack() {

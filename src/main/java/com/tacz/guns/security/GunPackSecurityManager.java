@@ -66,6 +66,17 @@ public class GunPackSecurityManager {
     }
 
     public synchronized void initializeServerPacks() {
+        if (SecurityConfig.ENABLE_SERVER_PACK_SYNC != null && !SecurityConfig.ENABLE_SERVER_PACK_SYNC.get()) {
+            LOGGER.info("[GunPackSecurity] Server pack sync is disabled in config.");
+            clear();
+            return;
+        }
+        var server = cn.sh1rocu.tacz.TaCZFabric.getServer();
+        if (server != null && !server.isDedicatedServer()) {
+            LOGGER.info("[GunPackSecurity] Singleplayer integrated server detected; skipping server pack sync.");
+            clear();
+            return;
+        }
         try {
             Path packsPath = FabricLoader.getInstance().getGameDir().resolve("tacz");
             if (!Files.exists(packsPath) || !Files.isDirectory(packsPath)) {
@@ -209,6 +220,12 @@ public class GunPackSecurityManager {
     }
 
     public void onPlayerJoin(ServerPlayer player) {
+        if (SecurityConfig.ENABLE_SERVER_PACK_SYNC != null && !SecurityConfig.ENABLE_SERVER_PACK_SYNC.get()) {
+            return;
+        }
+        if (player == null || player.server == null || !player.server.isDedicatedServer()) {
+            return;
+        }
         if (!hasPacksToSync()) {
             return;
         }

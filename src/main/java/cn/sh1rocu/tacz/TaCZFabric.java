@@ -87,7 +87,9 @@ public class TaCZFabric implements ModInitializer {
 
         ServerLifecycleEvents.SERVER_STARTED.register(server -> {
             CommonRegistry.onLoadComplete();
-            com.tacz.guns.security.GunPackSecurityManager.getInstance().initializeServerPacks();
+            if (server.isDedicatedServer()) {
+                com.tacz.guns.security.GunPackSecurityManager.getInstance().initializeServerPacks();
+            }
         });
 
         AmmoHitBlockEvent.CALLBACK.register(BellRing::onAmmoHitBlock);

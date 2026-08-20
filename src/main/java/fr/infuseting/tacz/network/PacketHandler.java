@@ -1,6 +1,8 @@
 package fr.infuseting.tacz.network;
 
 import fr.infuseting.tacz.TaCZMagazines;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
@@ -54,52 +56,61 @@ public class PacketHandler {
         });
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendSelectMagazine(int slot, boolean fastReload) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new SelectMagazinePacket(slot, fastReload).encode(buf);
         ClientPlayNetworking.send(SELECT_MAGAZINE_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendSelectMagazine(int slot) {
         sendSelectMagazine(slot, false);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendOpenSelector(boolean open) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new OpenSelectorPacket(open).encode(buf);
         ClientPlayNetworking.send(OPEN_SELECTOR_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendUnloadGunMag() {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new UnloadGunMagPacket().encode(buf);
         ClientPlayNetworking.send(UNLOAD_GUN_MAG_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendBulletTransfer(int slot, boolean unload) {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new BulletTransferPacket(slot, unload).encode(buf);
         ClientPlayNetworking.send(BULLET_TRANSFER_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendLoadOneFromHand() {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new LoadOneFromHandPacket().encode(buf);
         ClientPlayNetworking.send(LOAD_ONE_FROM_HAND_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendUnloadOneFromHand() {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new UnloadOneFromHandPacket().encode(buf);
         ClientPlayNetworking.send(UNLOAD_ONE_FROM_HAND_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendCheckMagazine() {
         FriendlyByteBuf buf = PacketByteBufs.create();
         new CheckMagazinePacket().encode(buf);
         ClientPlayNetworking.send(CHECK_MAGAZINE_ID, buf);
     }
 
+    @Environment(EnvType.CLIENT)
     public static void sendToServer(Object msg) {
         if (msg instanceof SelectMagazinePacket p) {
             sendSelectMagazine(p.getSlot());

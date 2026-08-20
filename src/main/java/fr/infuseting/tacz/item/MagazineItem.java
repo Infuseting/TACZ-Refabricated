@@ -394,22 +394,24 @@ public class MagazineItem extends Item implements IAmmoBox {
         }
     }
 
+    @Environment(EnvType.CLIENT)
     private static void triggerClientUnload(int idx) {
-        if (net.fabricmc.api.EnvType.CLIENT == net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType()) {
-            ClientMagazineActionHelper.startOrToggleUnloading(idx);
-        }
+        ClientMagazineActionHelper.startOrToggleUnloading(idx);
     }
 
+    @Environment(EnvType.CLIENT)
     private static void triggerClientLoad(int idx) {
-        if (net.fabricmc.api.EnvType.CLIENT == net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType()) {
-            ClientMagazineActionHelper.startOrToggleLoading(idx);
-        }
+        ClientMagazineActionHelper.startOrToggleLoading(idx);
     }
 
+    @Environment(EnvType.CLIENT)
     private static void triggerClientCancel() {
-        if (net.fabricmc.api.EnvType.CLIENT == net.fabricmc.loader.api.FabricLoader.getInstance().getEnvironmentType()) {
-            ClientMagazineActionHelper.cancelLoading();
-        }
+        ClientMagazineActionHelper.cancelLoading();
+    }
+
+    @Environment(EnvType.CLIENT)
+    private static void triggerClientInHandUnload() {
+        ClientMagazineActionHelper.startOrToggleInHandUnloading();
     }
 
     // â”€â”€ Transfer helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
@@ -590,6 +592,7 @@ public class MagazineItem extends Item implements IAmmoBox {
     }
 
     @Override
+    @Environment(EnvType.CLIENT)
     public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
         String familyId = getMagazineFamilyId(stack);
         if (familyId != null) {
@@ -606,7 +609,7 @@ public class MagazineItem extends Item implements IAmmoBox {
                             .collect(Collectors.toList());
 
                     for (String gunName : gunNames) {
-                        tooltip.add(Component.literal("  â€¢ " + gunName)
+                        tooltip.add(Component.literal("  • " + gunName)
                                 .withStyle(ChatFormatting.GRAY));
                     }
                 }
@@ -637,7 +640,7 @@ public class MagazineItem extends Item implements IAmmoBox {
 
         if (level.isClientSide) {
             if (MechanicsConfig.IN_HAND_TICK_BASED.get()) {
-                ClientMagazineActionHelper.startOrToggleInHandUnloading();
+                triggerClientInHandUnload();
             }
             return InteractionResultHolder.consume(heldStack);
         }
