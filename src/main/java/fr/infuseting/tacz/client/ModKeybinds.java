@@ -34,6 +34,13 @@ public class ModKeybinds {
             com.tacz.guns.client.input.ReloadKey.RELOAD_KEY.getCategory()
     );
 
+    public static final KeyMapping UNJAM = new KeyMapping(
+            "key.taczmagazines.unjam",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_H,
+            com.tacz.guns.client.input.ReloadKey.RELOAD_KEY.getCategory()
+    );
+
     public static void register() {
         if (UNLOAD_MAG instanceof IKeyBinding mkb) {
             mkb.setKeyConflictContext(KeyConflictContext.IN_GAME);
@@ -47,9 +54,13 @@ public class ModKeybinds {
             mkb.setKeyConflictContext(KeyConflictContext.IN_GAME);
             mkb.setKeyModifierAndCode(KeyModifier.ALT, InputConstants.Type.KEYSYM.getOrCreate(GLFW.GLFW_KEY_R));
         }
+        if (UNJAM instanceof IKeyBinding mkb) {
+            mkb.setKeyConflictContext(KeyConflictContext.IN_GAME);
+        }
         KeyBindingHelper.registerKeyBinding(UNLOAD_MAG);
         KeyBindingHelper.registerKeyBinding(CHECK_MAG);
         KeyBindingHelper.registerKeyBinding(FAST_RELOAD);
+        KeyBindingHelper.registerKeyBinding(UNJAM);
     }
 
     public static boolean matchesUnloadKey(int key, int scanCode) {

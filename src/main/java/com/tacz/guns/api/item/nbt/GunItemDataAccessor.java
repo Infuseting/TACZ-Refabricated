@@ -36,6 +36,9 @@ public interface GunItemDataAccessor extends IGun {
     String LASER_COLOR_TAG = "LaserColor";
     String GUN_OVERHEAT_TAG = "HeatAmount";
     String GUN_OVERHEAT_LOCK_TAG = "OverHeated";
+    String GUN_DURABILITY_TAG = "GunDurability";
+    String GUN_MAX_DURABILITY_TAG = "GunMaxDurability";
+    String GUN_IS_JAMMED_TAG = "IsJammed";
 
     @Override
     default boolean useDummyAmmo(ItemStack gun) {
@@ -478,5 +481,59 @@ public interface GunItemDataAccessor extends IGun {
                     float heatPercentage = (getHeatAmount(gun) / heatData.getHeatMax());
                     return Mth.lerp(heatPercentage, heatData.getMinInaccuracy(), heatData.getMaxInaccuracy());
                 }).orElse(1f);
+    }
+
+    /**
+     * Durability & Jam Data
+     */
+    @Override
+    default float getDurability(ItemStack gun) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        if (nbt.contains(GUN_DURABILITY_TAG, Tag.TAG_FLOAT)) {
+            return Mth.clamp(nbt.getFloat(GUN_DURABILITY_TAG), 0f, getMaxDurability(gun));
+        }
+        return 100f;
+    }
+
+    @Override
+    default void setDurability(ItemStack gun, float durability) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        nbt.putFloat(GUN_DURABILITY_TAG, Mth.clamp(durability, 0f, getMaxDurability(gun)));
+    }
+
+    @Override
+    default void reduceDurability(ItemStack gun, float amount) {
+        setDurability(gun, getDurability(gun) - amount);
+    }
+
+    @Override
+    default float getMaxDurability(ItemStack gun) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        if (nbt.contains(GUN_MAX_DURABILITY_TAG, Tag.TAG_FLOAT)) {
+            return Mth.clamp(nbt.getFloat(GUN_MAX_DURABILITY_TAG), 0f, 100f);
+        }
+        return 100f;
+    }
+
+    @Override
+    default void setMaxDurability(ItemStack gun, float maxDurability) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        float clamped = Mth.clamp(maxDurability, 0f, 100f);
+        nbt.putFloat(GUN_MAX_DURABILITY_TAG, clamped);
+        if (getDurability(gun) > clamped) {
+            setDurability(gun, clamped);
+        }
+    }
+
+    @Override
+    default boolean isJammed(ItemStack gun) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        return nbt.getBoolean(GUN_IS_JAMMED_TAG);
+    }
+
+    @Override
+    default void setJammed(ItemStack gun, boolean jammed) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        nbt.putBoolean(GUN_IS_JAMMED_TAG, jammed);
     }
 }

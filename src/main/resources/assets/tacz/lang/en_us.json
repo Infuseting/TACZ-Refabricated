@@ -299,5 +299,14 @@
     "key.taczmagazines.unload_mag":  "Unload Magazine",
     "key.taczmagazines.check_mag":  "Check Magazine",
     "key.taczmagazines.fast_reload":  "Emergency Reload",
-    "key.categories.taczmagazines":  "TaCZ Magazines"
+    "key.taczmagazines.unjam":  "Clear Weapon Malfunction (Unjam)",
+    "key.categories.taczmagazines":  "TaCZ Magazines",
+    "item.tacz.cleaning_kit": "Gun Cleaning Kit",
+    "message.taczmagazines.gun_jammed": "§c⚠ Weapon malfunction! Press [%s] to unjam",
+    "message.taczmagazines.gun_unjammed": "§a✔ Malfunction cleared",
+    "message.taczmagazines.gun_cleaned": "§a✔ Weapon cleaned and maintained",
+    "message.taczmagazines.gun_already_clean": "§eThis weapon is already in peak condition.",
+    "message.taczmagazines.cleaning_kit_hint": "§eHold a firearm in your other hand to clean it.",
+    "tooltip.tacz.gun.durability": "Durability: %s",
+    "tooltip.tacz.ammo.damage": "Damage: %s"
 }

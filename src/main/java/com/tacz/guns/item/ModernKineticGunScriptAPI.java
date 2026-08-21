@@ -104,8 +104,13 @@ public class ModernKineticGunScriptAPI {
         GunData gunData = gunIndex.getGunData();
         BulletData bulletData = gunIndex.getBulletData();
         IGunOperator gunOperator = IGunOperator.fromLivingEntity(shooter);
-        final float shotDamageMultiplier = this.shotDamageMultiplier;
-        final float projectileSpeedMultiplier = this.projectileSpeedMultiplier;
+        // Durability Modifiers
+        float durabilitySpeedMult = fr.infuseting.tacz.durability.GunDurabilityManager.getVelocityMultiplier(itemStack);
+        float durabilityDamageMult = fr.infuseting.tacz.durability.GunDurabilityManager.getDamageMultiplier(itemStack);
+        float durabilitySpreadMult = fr.infuseting.tacz.durability.GunDurabilityManager.getSpreadMultiplier(itemStack);
+
+        final float shotDamageMultiplier = this.shotDamageMultiplier * durabilityDamageMult;
+        final float projectileSpeedMultiplier = this.projectileSpeedMultiplier * durabilitySpeedMult;
 
         // 获取配件数据缓存
         AttachmentCacheProperty cacheProperty = gunOperator.getCacheProperty();
@@ -124,7 +129,7 @@ public class ModernKineticGunScriptAPI {
 
         // 散射影响
         InaccuracyType inaccuracyType = InaccuracyType.getInaccuracyType(shooter);
-        final float unmodifiedInaccuracy = cacheProperty.getCache(GunProperties.INACCURACY).get(inaccuracyType) * heatInaccuracy;
+        final float unmodifiedInaccuracy = cacheProperty.getCache(GunProperties.INACCURACY).get(inaccuracyType) * heatInaccuracy * durabilitySpreadMult;
         final float inaccuracy = Math.max(0, modifyProperty(GunProperties.INACCURACY, Float.class, unmodifiedInaccuracy));
 
         // 消音器影响

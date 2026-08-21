@@ -409,4 +409,21 @@ public interface IGun {
     float lerpInaccuracy(ItemStack gun);
 
     float getHeatAmount(ItemStack gun);
+
+    /**
+     * Durability & Jam Data
+     */
+    float getDurability(ItemStack gun);
+
+    void setDurability(ItemStack gun, float durability);
+
+    void reduceDurability(ItemStack gun, float amount);
+
+    float getMaxDurability(ItemStack gun);
+
+    void setMaxDurability(ItemStack gun, float maxDurability);
+
+    boolean isJammed(ItemStack gun);
+
+    void setJammed(ItemStack gun, boolean jammed);
 }

@@ -64,5 +64,9 @@ public enum ShootResult {
     /**
      * 武器过热
      */
-    OVERHEATED
+    OVERHEATED,
+    /**
+     * 武器卡壳/enrayement (JAM)
+     */
+    JAMMED
 }

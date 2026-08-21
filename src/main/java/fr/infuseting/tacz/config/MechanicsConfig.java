@@ -33,6 +33,19 @@ public class MechanicsConfig {
     // Source ordering for both gun reloads and loose-round loading.
     public static final ForgeConfigSpec.BooleanValue PREFER_PLAYER_INVENTORY;
 
+    // Durability & Jamming system (EFT-style)
+    public static final ForgeConfigSpec.BooleanValue ENABLE_DURABILITY;
+    public static final ForgeConfigSpec.DoubleValue DURABILITY_LOSS_PER_SHOT;
+    public static final ForgeConfigSpec.DoubleValue JAM_SAFETY_THRESHOLD;
+    public static final ForgeConfigSpec.DoubleValue MAX_JAM_CHANCE;
+    public static final ForgeConfigSpec.DoubleValue STAT_PENALTY_VELOCITY_MAX;
+    public static final ForgeConfigSpec.DoubleValue STAT_PENALTY_DAMAGE_MAX;
+    public static final ForgeConfigSpec.DoubleValue STAT_PENALTY_SPREAD_MAX;
+    public static final ForgeConfigSpec.DoubleValue CLEANING_MAX_CAP_LOSS_REGULAR;
+    public static final ForgeConfigSpec.DoubleValue CLEANING_MAX_CAP_LOSS_HEAVY;
+    public static final ForgeConfigSpec.DoubleValue CLEANING_RESTORE_WEAR_FACTOR;
+    public static final ForgeConfigSpec.BooleanValue DROP_JAMMED_BULLET;
+
     static {
         ForgeConfigSpec.Builder b = new ForgeConfigSpec.Builder();
         b.push("loading");
@@ -115,6 +128,53 @@ public class MechanicsConfig {
                 .comment("When true, loose ammo and loose magazines in the player inventory",
                          "are used before ammo-box contents. Set false to drain boxes first.")
                 .define("prefer_player_inventory", true);
+
+        b.pop();
+        b.push("durability");
+
+        ENABLE_DURABILITY = b
+                .comment("Enable or disable the Tarkov-style durability, degradation and jamming (JAM) system.")
+                .define("enable_durability", true);
+
+        DURABILITY_LOSS_PER_SHOT = b
+                .comment("Base durability lost per bullet fired (0-100 scale). Default: 0.1% (~1000 shots per gun).")
+                .defineInRange("durability_loss_per_shot", 0.1, 0.0, 10.0);
+
+        JAM_SAFETY_THRESHOLD = b
+                .comment("Durability percentage above which weapon has 0% chance of jamming and 100% stats (Tarkov threshold).")
+                .defineInRange("jam_safety_threshold", 90.0, 0.0, 100.0);
+
+        MAX_JAM_CHANCE = b
+                .comment("Maximum jam probability when weapon durability is at 0%. Default: 0.25 (25% chance per shot).")
+                .defineInRange("max_jam_chance", 0.25, 0.0, 1.0);
+
+        STAT_PENALTY_VELOCITY_MAX = b
+                .comment("Maximum bullet velocity penalty when durability is 0% (e.g. 0.20 = -20% bullet velocity).")
+                .defineInRange("stat_penalty_velocity_max", 0.20, 0.0, 1.0);
+
+        STAT_PENALTY_DAMAGE_MAX = b
+                .comment("Maximum bullet damage penalty when durability is 0% (e.g. 0.20 = -20% damage).")
+                .defineInRange("stat_penalty_damage_max", 0.20, 0.0, 1.0);
+
+        STAT_PENALTY_SPREAD_MAX = b
+                .comment("Maximum bullet spread / inaccuracy multiplier when durability is 0% (e.g. 2.5 = 250% spread).")
+                .defineInRange("stat_penalty_spread_max", 2.5, 1.0, 10.0);
+
+        CLEANING_MAX_CAP_LOSS_REGULAR = b
+                .comment("Base permanent max durability cap loss when cleaning a regularly maintained gun (>80% durability). Default: 2.5%")
+                .defineInRange("cleaning_max_cap_loss_regular", 2.5, 0.0, 50.0);
+
+        CLEANING_MAX_CAP_LOSS_HEAVY = b
+                .comment("Base permanent max durability cap loss when cleaning a heavily worn gun (<40% durability). Default: 8.0%")
+                .defineInRange("cleaning_max_cap_loss_heavy", 8.0, 0.0, 50.0);
+
+        CLEANING_RESTORE_WEAR_FACTOR = b
+                .comment("Permanent max cap degradation factor based on repaired durability (e.g. 0.10 = 10% of restored durability permanently reduces max cap).")
+                .defineInRange("cleaning_restore_wear_factor", 0.10, 0.0, 1.0);
+
+        DROP_JAMMED_BULLET = b
+                .comment("Whether unjamming a jammed weapon drops the ejected round on the ground.")
+                .define("drop_jammed_bullet", true);
 
         b.pop();
         SPEC = b.build();

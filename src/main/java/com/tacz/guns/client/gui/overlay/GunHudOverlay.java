@@ -38,6 +38,7 @@ public class GunHudOverlay {
     private static final ResourceLocation AUTO = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_auto.png");
     private static final ResourceLocation BURST = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_burst.png");
     private static final ResourceLocation SAFE = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_safe.png");
+    private static final ResourceLocation JAM = new ResourceLocation(GunMod.MOD_ID, "textures/hud/fire_mode_jam.png");
     private static final ResourceLocation HEATBAR = new ResourceLocation(GunMod.MOD_ID, "textures/hud/heat_bar.png");
     private static final ResourceLocation HEATBASE = new ResourceLocation(GunMod.MOD_ID, "textures/hud/heat_base.png");
 
@@ -177,12 +178,17 @@ public class GunHudOverlay {
 
         // 渲染开火模式图标
         FireMode fireMode = IGun.getMainHandFireMode(player);
-        ResourceLocation fireModeTexture = switch (fireMode) {
-            case AUTO -> AUTO;
-            case BURST -> BURST;
-            case SAFE -> SAFE;
-            default -> SEMI;
-        };
+        ResourceLocation fireModeTexture;
+        if (iGun.isJammed(stack)) {
+            fireModeTexture = JAM;
+        } else {
+            fireModeTexture = switch (fireMode) {
+                case AUTO -> AUTO;
+                case BURST -> BURST;
+                case SAFE -> SAFE;
+                default -> SEMI;
+            };
+        }
         RenderSystem.setShaderColor(1, 1, 1, 1);
         graphics.blit(fireModeTexture, (int) (width - 68.5 + mc.font.width(currentAmmoCountText) * 1.5), height - 38, 0, 0, 10, 10, 10, 10);
     }

@@ -141,11 +141,27 @@ public class LivingEntityShoot {
             }
             iGun.setBulletInBarrel(currentGunItem, true);
         }
+        // Handle Jamming & Durability
+        if (iGun.isJammed(currentGunItem)) {
+            return ShootResult.JAMMED;
+        }
+        if (fr.infuseting.tacz.durability.GunDurabilityManager.rollJam(shooter, currentGunItem)) {
+            iGun.setJammed(currentGunItem, true);
+            if (shooter instanceof ServerPlayer player) {
+                player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.taczmagazines.gun_jammed", "H"), true);
+            }
+            return ShootResult.JAMMED;
+        }
+
         // 触发射击事件
         GunShootEvent gunShootEvent = new GunShootEvent(shooter, currentGunItem, LogicalSide.SERVER);
         GunShootEvent.CALLBACK.invoker().post(gunShootEvent);
         if (gunShootEvent.isCanceled()) {
             return ShootResult.FORGE_EVENT_CANCEL;
+        }
+
+        if (fr.infuseting.tacz.durability.GunDurabilityManager.isEnabled()) {
+            iGun.reduceDurability(currentGunItem, fr.infuseting.tacz.durability.GunDurabilityManager.getDurabilityLossPerShot());
         }
 
         NetworkHandler.sendToTrackingEntity(new ServerMessageGunShoot(shooter.getId(), currentGunItem), shooter);

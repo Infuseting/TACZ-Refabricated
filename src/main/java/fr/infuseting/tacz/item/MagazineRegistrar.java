@@ -22,9 +22,11 @@ public class MagazineRegistrar {
 
     public static final MagazineItem MAGAZINE_ITEM = new MagazineItem(new Item.Properties().stacksTo(1));
     public static final Item TAB_ICON_ITEM = new Item(new Item.Properties());
+    public static final GunCleaningKitItem CLEANING_KIT_ITEM = new GunCleaningKitItem(new Item.Properties().stacksTo(16));
 
     public static final Supplier<MagazineItem> MAGAZINE = () -> MAGAZINE_ITEM;
     public static final Supplier<Item> TAB_ICON = () -> TAB_ICON_ITEM;
+    public static final Supplier<GunCleaningKitItem> CLEANING_KIT = () -> CLEANING_KIT_ITEM;
 
     public static final ResourceKey<CreativeModeTab> MAGAZINE_TAB_KEY = ResourceKey.create(
             Registries.CREATIVE_MODE_TAB,
@@ -36,11 +38,13 @@ public class MagazineRegistrar {
     public static void register() {
         Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(TaCZMagazines.MODID, "magazine"), MAGAZINE_ITEM);
         Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(TaCZMagazines.MODID, "tab_icon"), TAB_ICON_ITEM);
+        Registry.register(BuiltInRegistries.ITEM, new ResourceLocation(TaCZMagazines.MODID, "cleaning_kit"), CLEANING_KIT_ITEM);
 
         MAGAZINE_TAB = FabricItemGroup.builder()
                 .title(Component.literal("TaCZ Magazines"))
                 .icon(() -> new ItemStack(TAB_ICON_ITEM))
                 .displayItems((params, output) -> {
+                    output.accept(CLEANING_KIT_ITEM);
                     Set<String> addedFull = new HashSet<>();
                     Set<String> addedEmpty = new HashSet<>();
 

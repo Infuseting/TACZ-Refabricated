@@ -56,7 +56,8 @@ public class ClientGunTooltip implements ClientTooltipComponent {
     private Component ammoName;
     private MutableComponent ammoCountText;
     private @Nullable MutableComponent gunType;
-    private MutableComponent damage;
+    private @Nullable MutableComponent damage;
+    private @Nullable MutableComponent durabilityInfo;
     private MutableComponent armorIgnore;
     private MutableComponent headShotMultiplier;
     private MutableComponent weight;
@@ -87,7 +88,11 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             height += 24;
         }
         if (shouldShow(GunTooltipPart.BASE_INFO)) {
-            height += 34;
+            height += 4;
+            if (this.levelInfo != null) height += 10;
+            if (this.gunType != null) height += 10;
+            if (this.damage != null) height += 10;
+            if (this.durabilityInfo != null) height += 10;
         }
         if (shouldShow(GunTooltipPart.EXTRA_DAMAGE_INFO)) {
             height += 34;
@@ -202,20 +207,30 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             this.gunType = Component.translatable("tooltip.tacz.gun.type").append(Component.translatable(tabKey).withStyle(ChatFormatting.AQUA));
             this.maxWidth = Math.max(font.width(this.gunType), this.maxWidth);
 
-            double damage = AttachmentDataUtils.getDamageWithAttachment(gun, gunData);
-            boolean hasSlugInstalled = AllowAttachmentTagMatcher.matchTag(SLUGS, iGun.getAttachmentId(gun, AttachmentType.EXTENDED_MAG));
-            int bulletAmount = hasSlugInstalled ? 1 : gunData.getBulletData().getBulletAmount();
-            MutableComponent value;
-            if (display != null && display.getDamageStyle() == DamageStyle.PER_PROJECTILE && bulletAmount > 1) {
-                value = Component.literal(DAMAGE_FORMAT.format(damage / bulletAmount) + "x" + bulletAmount).withStyle(ChatFormatting.AQUA);
+            boolean isCreative = Minecraft.getInstance().player != null && (Minecraft.getInstance().player.isCreative() || Minecraft.getInstance().player.getAbilities().instabuild);
+            if (isCreative) {
+                double damage = AttachmentDataUtils.getDamageWithAttachment(gun, gunData);
+                boolean hasSlugInstalled = AllowAttachmentTagMatcher.matchTag(SLUGS, iGun.getAttachmentId(gun, AttachmentType.EXTENDED_MAG));
+                int bulletAmount = hasSlugInstalled ? 1 : gunData.getBulletData().getBulletAmount();
+                MutableComponent value;
+                if (display != null && display.getDamageStyle() == DamageStyle.PER_PROJECTILE && bulletAmount > 1) {
+                    value = Component.literal(DAMAGE_FORMAT.format(damage / bulletAmount) + "x" + bulletAmount).withStyle(ChatFormatting.AQUA);
+                } else {
+                    value = Component.literal(DAMAGE_FORMAT.format(damage)).withStyle(ChatFormatting.AQUA);
+                }
+                if (bulletData.getExplosionData() != null && (AttachmentDataUtils.isExplodeEnabled(gun, gunData) || bulletData.getExplosionData().isExplode())) {
+                    value.append(" + ").append(DAMAGE_FORMAT.format(bulletData.getExplosionData().getDamage() * SyncConfig.DAMAGE_BASE_MULTIPLIER.get())).append(Component.translatable("tooltip.tacz.gun.explosion"));
+                }
+                this.damage = Component.translatable("tooltip.tacz.gun.damage").append(value);
+                this.maxWidth = Math.max(font.width(this.damage), this.maxWidth);
+
+                String durFormatted = String.format(Locale.ROOT, "%.1f%% / %.1f%%", iGun.getDurability(gun), iGun.getMaxDurability(gun));
+                this.durabilityInfo = Component.translatable("tooltip.tacz.gun.durability", durFormatted).withStyle(ChatFormatting.GREEN);
+                this.maxWidth = Math.max(font.width(this.durabilityInfo), this.maxWidth);
             } else {
-                value = Component.literal(DAMAGE_FORMAT.format(damage)).withStyle(ChatFormatting.AQUA);
+                this.damage = null;
+                this.durabilityInfo = null;
             }
-            if (bulletData.getExplosionData() != null && (AttachmentDataUtils.isExplodeEnabled(gun, gunData) || bulletData.getExplosionData().isExplode())) {
-                value.append(" + ").append(DAMAGE_FORMAT.format(bulletData.getExplosionData().getDamage() * SyncConfig.DAMAGE_BASE_MULTIPLIER.get())).append(Component.translatable("tooltip.tacz.gun.explosion"));
-            }
-            this.damage = Component.translatable("tooltip.tacz.gun.damage").append(value);
-            this.maxWidth = Math.max(font.width(this.damage), this.maxWidth);
         }
 
 
@@ -291,8 +306,10 @@ public class ClientGunTooltip implements ClientTooltipComponent {
             yOffset += 4;
 
             // 等级信息
-            font.drawInBatch(this.levelInfo, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
-            yOffset += 10;
+            if (this.levelInfo != null) {
+                font.drawInBatch(this.levelInfo, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                yOffset += 10;
+            }
 
             // 枪械类型
             if (this.gunType != null) {
@@ -300,9 +317,17 @@ public class ClientGunTooltip implements ClientTooltipComponent {
                 yOffset += 10;
             }
 
-            // 伤害
-            font.drawInBatch(this.damage, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
-            yOffset += 10;
+            // 伤害 (créatif uniquement)
+            if (this.damage != null) {
+                font.drawInBatch(this.damage, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                yOffset += 10;
+            }
+
+            // Durabilité (créatif uniquement)
+            if (this.durabilityInfo != null) {
+                font.drawInBatch(this.durabilityInfo, pX, yOffset, 0x777777, false, matrix4f, bufferSource, Font.DisplayMode.NORMAL, 0, 0xF000F0);
+                yOffset += 10;
+            }
         }
 
 

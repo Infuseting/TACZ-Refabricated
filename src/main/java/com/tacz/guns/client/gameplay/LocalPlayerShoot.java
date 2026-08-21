@@ -239,6 +239,14 @@ public class LocalPlayerShoot {
                 return ShootResult.OVERHEATED;
             }
         }
+        // Handle Jammed state
+        if (iGun.isJammed(mainHandItem)) {
+            if (playDrySound) {
+                SoundPlayManager.playDryFireSound(player, display);
+            }
+            player.displayClientMessage(net.minecraft.network.chat.Component.translatable("message.taczmagazines.gun_jammed", fr.infuseting.tacz.client.ModKeybinds.UNJAM.getTranslatedKeyMessage().getString()), true);
+            return ShootResult.JAMMED;
+        }
         // 检查膛内子弹
         if (boltType == Bolt.MANUAL_ACTION && !hasAmmoInBarrel) {
             IClientPlayerGunOperator.fromLocalPlayer(player).bolt();

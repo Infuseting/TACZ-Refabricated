@@ -196,7 +196,8 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
         this.damageAmount = cacheProperty.getCache(DamageModifier.ID);
         this.distanceAmount = modifyProperty(GunProperties.EFFECTIVE_RANGE, Float.class, cacheProperty.getCache(GunProperties.EFFECTIVE_RANGE));
         int pierce = modifyProperty(GunProperties.PIERCE, Integer.class, cacheProperty.getCache(GunProperties.PIERCE));
-        this.pierce = Mth.clamp(pierce, 1, Integer.MAX_VALUE);
+        int piercePenalty = fr.infuseting.tacz.durability.GunDurabilityManager.getPiercePenalty(gunItem);
+        this.pierce = Mth.clamp(pierce - piercePenalty, 1, Integer.MAX_VALUE);
         ExplosionData explosionData = Objects.requireNonNullElse(cacheProperty.getCache(ExplosionModifier.ID), DEFAULT_EXPLOSION_DATA);
         this.explosion = modifyProperty(EXPLODE_ENABLED, Boolean.class, explosionData.isExplode());
         if (this.explosion) {

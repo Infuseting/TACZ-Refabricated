@@ -18,6 +18,7 @@ public class PacketHandler {
     public static final ResourceLocation LOAD_ONE_FROM_HAND_ID = new ResourceLocation(TaCZMagazines.MODID, "load_one_from_hand");
     public static final ResourceLocation UNLOAD_ONE_FROM_HAND_ID = new ResourceLocation(TaCZMagazines.MODID, "unload_one_from_hand");
     public static final ResourceLocation CHECK_MAGAZINE_ID = new ResourceLocation(TaCZMagazines.MODID, "check_magazine");
+    public static final ResourceLocation UNJAM_GUN_ID = new ResourceLocation(TaCZMagazines.MODID, "unjam_gun");
 
     public static void register() {
         ServerPlayNetworking.registerGlobalReceiver(SELECT_MAGAZINE_ID, (server, player, handler, buf, responseSender) -> {
@@ -52,6 +53,11 @@ public class PacketHandler {
 
         ServerPlayNetworking.registerGlobalReceiver(CHECK_MAGAZINE_ID, (server, player, handler, buf, responseSender) -> {
             CheckMagazinePacket packet = CheckMagazinePacket.decode(buf);
+            server.execute(() -> packet.handle(player));
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(UNJAM_GUN_ID, (server, player, handler, buf, responseSender) -> {
+            UnjamGunPacket packet = UnjamGunPacket.decode(buf);
             server.execute(() -> packet.handle(player));
         });
     }
@@ -111,6 +117,13 @@ public class PacketHandler {
     }
 
     @Environment(EnvType.CLIENT)
+    public static void sendUnjamGun() {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        new UnjamGunPacket().encode(buf);
+        ClientPlayNetworking.send(UNJAM_GUN_ID, buf);
+    }
+
+    @Environment(EnvType.CLIENT)
     public static void sendToServer(Object msg) {
         if (msg instanceof SelectMagazinePacket p) {
             sendSelectMagazine(p.getSlot());
@@ -126,6 +139,8 @@ public class PacketHandler {
             sendUnloadOneFromHand();
         } else if (msg instanceof CheckMagazinePacket) {
             sendCheckMagazine();
+        } else if (msg instanceof UnjamGunPacket) {
+            sendUnjamGun();
         }
     }
 }

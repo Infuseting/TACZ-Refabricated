@@ -292,5 +292,19 @@
   "config.tacz.client.render.enable_tooltip_id.desc": "Afficher les ID des armes/munitions/attachements dans le tooltip quand le tooltip avancé est activé (F3+H).",
   "tooltip.tacz.attachment.laser.color": "Couleur du Laser: %s",
   "config.tacz.client.render.laser_fadeout": "Effet de Dissipation du Laser",
-  "config.tacz.client.render.laser_fadeout.desc": "Si il faut oui ou non utiliser l'effet de dissipation du laser. Désactiver ceci pourrait améliorer la performance des lasers avec certains shaders."
+  "config.tacz.client.render.laser_fadeout.desc": "Si il faut oui ou non utiliser l'effet de dissipation du laser. Désactiver ceci pourrait améliorer la performance des lasers avec certains shaders.",
+  "taczmagazines.tab.magazines": "Chargeurs",
+  "key.taczmagazines.unload_mag": "Éjecter le Chargeur",
+  "key.taczmagazines.check_mag": "Vérifier le Chargeur",
+  "key.taczmagazines.fast_reload": "Rechargement d'Urgence",
+  "key.taczmagazines.unjam": "Débloquer l'arme (Dé-JAM)",
+  "key.categories.taczmagazines": "TaCZ Magazines",
+  "item.tacz.cleaning_kit": "Kit de nettoyage d'arme",
+  "message.taczmagazines.gun_jammed": "§c⚠ Arme enrayée ! Appuyez sur [%s] pour réarmer",
+  "message.taczmagazines.gun_unjammed": "§a✔ Incident de tir résolu",
+  "message.taczmagazines.gun_cleaned": "§a✔ Arme entretenue et nettoyée",
+  "message.taczmagazines.gun_already_clean": "§eCette arme est déjà en parfait état de propreté.",
+  "message.taczmagazines.cleaning_kit_hint": "§eTenez une arme à feu dans votre autre main pour l'entretenir avec le kit.",
+  "tooltip.tacz.gun.durability": "Durabilité: %s",
+  "tooltip.tacz.ammo.damage": "Dégâts: %s"
 }

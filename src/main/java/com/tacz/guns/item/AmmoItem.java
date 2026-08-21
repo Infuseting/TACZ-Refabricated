@@ -87,6 +87,16 @@ public class AmmoItem extends Item implements AmmoItemDataAccessor, IItem {
             }
         });
 
+        net.minecraft.client.Minecraft mc = net.minecraft.client.Minecraft.getInstance();
+        boolean isCreative = mc.player != null && (mc.player.isCreative() || mc.player.getAbilities().instabuild);
+        if (isCreative) {
+            TimelessAPI.getCommonAmmoData(ammoId).ifPresent(ammoData -> {
+                if (ammoData.getDamage() != null) {
+                    components.add(Component.translatable("tooltip.tacz.ammo.damage", String.format(java.util.Locale.ROOT, "%.1f", ammoData.getDamage())).withStyle(ChatFormatting.AQUA));
+                }
+            });
+        }
+
         PackInfo packInfoObject = ClientAssetsManager.INSTANCE.getPackInfo(ammoId);
         if (packInfoObject != null) {
             MutableComponent component = Component.translatable(packInfoObject.getName()).withStyle(ChatFormatting.BLUE).withStyle(ChatFormatting.ITALIC);
