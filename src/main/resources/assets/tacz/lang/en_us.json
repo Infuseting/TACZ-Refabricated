@@ -300,6 +300,7 @@
     "key.taczmagazines.check_mag":  "Check Magazine",
     "key.taczmagazines.fast_reload":  "Emergency Reload",
     "key.taczmagazines.unjam":  "Clear Weapon Malfunction (Unjam)",
+    "key.taczmagazines.toggle_safe": "Toggle Safety (SAFE)",
     "key.categories.taczmagazines":  "TaCZ Magazines",
     "item.tacz.cleaning_kit": "Gun Cleaning Kit",
     "message.taczmagazines.gun_jammed": "§c⚠ Weapon malfunction! Press [%s] to unjam",

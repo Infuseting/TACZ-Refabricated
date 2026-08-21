@@ -41,6 +41,13 @@ public class ModKeybinds {
             com.tacz.guns.client.input.ReloadKey.RELOAD_KEY.getCategory()
     );
 
+    public static final KeyMapping TOGGLE_SAFE = new KeyMapping(
+            "key.taczmagazines.toggle_safe",
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_B,
+            com.tacz.guns.client.input.ReloadKey.RELOAD_KEY.getCategory()
+    );
+
     public static void register() {
         if (UNLOAD_MAG instanceof IKeyBinding mkb) {
             mkb.setKeyConflictContext(KeyConflictContext.IN_GAME);
@@ -57,10 +64,14 @@ public class ModKeybinds {
         if (UNJAM instanceof IKeyBinding mkb) {
             mkb.setKeyConflictContext(KeyConflictContext.IN_GAME);
         }
+        if (TOGGLE_SAFE instanceof IKeyBinding mkb) {
+            mkb.setKeyConflictContext(KeyConflictContext.IN_GAME);
+        }
         KeyBindingHelper.registerKeyBinding(UNLOAD_MAG);
         KeyBindingHelper.registerKeyBinding(CHECK_MAG);
         KeyBindingHelper.registerKeyBinding(FAST_RELOAD);
         KeyBindingHelper.registerKeyBinding(UNJAM);
+        KeyBindingHelper.registerKeyBinding(TOGGLE_SAFE);
     }
 
     public static boolean matchesUnloadKey(int key, int scanCode) {

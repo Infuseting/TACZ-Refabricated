@@ -19,6 +19,7 @@ public class PacketHandler {
     public static final ResourceLocation UNLOAD_ONE_FROM_HAND_ID = new ResourceLocation(TaCZMagazines.MODID, "unload_one_from_hand");
     public static final ResourceLocation CHECK_MAGAZINE_ID = new ResourceLocation(TaCZMagazines.MODID, "check_magazine");
     public static final ResourceLocation UNJAM_GUN_ID = new ResourceLocation(TaCZMagazines.MODID, "unjam_gun");
+    public static final ResourceLocation TOGGLE_SAFE_ID = new ResourceLocation(TaCZMagazines.MODID, "toggle_safe");
 
     public static void register() {
         ServerPlayNetworking.registerGlobalReceiver(SELECT_MAGAZINE_ID, (server, player, handler, buf, responseSender) -> {
@@ -58,6 +59,11 @@ public class PacketHandler {
 
         ServerPlayNetworking.registerGlobalReceiver(UNJAM_GUN_ID, (server, player, handler, buf, responseSender) -> {
             UnjamGunPacket packet = UnjamGunPacket.decode(buf);
+            server.execute(() -> packet.handle(player));
+        });
+
+        ServerPlayNetworking.registerGlobalReceiver(TOGGLE_SAFE_ID, (server, player, handler, buf, responseSender) -> {
+            ToggleSafePacket packet = ToggleSafePacket.decode(buf);
             server.execute(() -> packet.handle(player));
         });
     }
@@ -124,6 +130,13 @@ public class PacketHandler {
     }
 
     @Environment(EnvType.CLIENT)
+    public static void sendToggleSafe() {
+        FriendlyByteBuf buf = PacketByteBufs.create();
+        new ToggleSafePacket().encode(buf);
+        ClientPlayNetworking.send(TOGGLE_SAFE_ID, buf);
+    }
+
+    @Environment(EnvType.CLIENT)
     public static void sendToServer(Object msg) {
         if (msg instanceof SelectMagazinePacket p) {
             sendSelectMagazine(p.getSlot());
@@ -141,6 +154,8 @@ public class PacketHandler {
             sendCheckMagazine();
         } else if (msg instanceof UnjamGunPacket) {
             sendUnjamGun();
+        } else if (msg instanceof ToggleSafePacket) {
+            sendToggleSafe();
         }
     }
 }

@@ -34,6 +34,10 @@ public class TaCZMagazinesClient implements ClientModInitializer {
         cn.sh1rocu.tacz.api.event.InputEvent.Key.EVENT.register(ClientUnjamHandler::onKeyPress);
         cn.sh1rocu.tacz.api.event.InputEvent.MouseButton.Post.EVENT.register(ClientUnjamHandler::onMousePress);
 
+        // Register direct safe input events
+        cn.sh1rocu.tacz.api.event.InputEvent.Key.EVENT.register(ClientSafeHandler::onKeyPress);
+        cn.sh1rocu.tacz.api.event.InputEvent.MouseButton.Post.EVENT.register(ClientSafeHandler::onMousePress);
+
         // Register client tick listeners
         ClientTickEvents.END_CLIENT_TICK.register(ClientReloadKeyHandler::onClientTick);
         ClientTickEvents.END_CLIENT_TICK.register(MagazineLoadingHandler::onClientTick);

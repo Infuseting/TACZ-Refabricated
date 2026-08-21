@@ -298,6 +298,7 @@
   "key.taczmagazines.check_mag": "Vérifier le Chargeur",
   "key.taczmagazines.fast_reload": "Rechargement d'Urgence",
   "key.taczmagazines.unjam": "Débloquer l'arme (Dé-JAM)",
+  "key.taczmagazines.toggle_safe": "Mode Sécurité (SAFE)",
   "key.categories.taczmagazines": "TaCZ Magazines",
   "item.tacz.cleaning_kit": "Kit de nettoyage d'arme",
   "message.taczmagazines.gun_jammed": "§c⚠ Arme enrayée ! Appuyez sur [%s] pour réarmer",

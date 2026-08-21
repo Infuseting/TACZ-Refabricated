@@ -216,6 +216,12 @@ dependencies {
 
     // 加速渲染
     modImplementation "maven.modrinth:accrelatedrendering-refabricated:1.0.8-1.20.1-alpha-fabric.1"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 processResources {
