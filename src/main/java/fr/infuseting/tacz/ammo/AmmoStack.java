@@ -17,8 +17,6 @@ import java.util.List;
  */
 public class AmmoStack {
     public static final String AMMO_STACK_TAG = "AmmoStack";
-    public static final String LEGACY_AMMO_ID_TAG = "AmmoId";
-    public static final String LEGACY_AMMO_COUNT_TAG = "AmmoCount";
 
     public static class AmmoEntry {
         private ResourceLocation id;
@@ -155,7 +153,7 @@ public class AmmoStack {
     }
 
     /**
-     * Lit AmmoStack a partir d'un ItemStack (avec gestion retro-compatible si seul l'ancien NBT existe).
+     * Lit AmmoStack a partir d'un ItemStack.
      */
     public static AmmoStack fromItemStack(ItemStack stack) {
         AmmoStack ammoStack = new AmmoStack();
@@ -163,34 +161,22 @@ public class AmmoStack {
             return ammoStack;
         }
         CompoundTag tag = stack.getTag();
-        if (tag != null) {
-            if (tag.contains(AMMO_STACK_TAG, Tag.TAG_LIST)) {
-                ammoStack.deserializeNBT(tag.getList(AMMO_STACK_TAG, Tag.TAG_COMPOUND));
-            } else if (tag.contains(LEGACY_AMMO_ID_TAG, Tag.TAG_STRING) && tag.contains(LEGACY_AMMO_COUNT_TAG, Tag.TAG_INT)) {
-                ResourceLocation id = new ResourceLocation(tag.getString(LEGACY_AMMO_ID_TAG));
-                int count = tag.getInt(LEGACY_AMMO_COUNT_TAG);
-                if (count > 0 && !id.equals(DefaultAssets.EMPTY_AMMO_ID)) {
-                    ammoStack.push(id, count);
-                }
-            }
+        if (tag != null && tag.contains(AMMO_STACK_TAG, Tag.TAG_LIST)) {
+            ammoStack.deserializeNBT(tag.getList(AMMO_STACK_TAG, Tag.TAG_COMPOUND));
         }
         return ammoStack;
     }
 
     /**
-     * Sauvegarde AmmoStack dans le NBT d'un ItemStack (en mettant a jour egalement les tags legacy).
+     * Sauvegarde AmmoStack dans le NBT d'un ItemStack.
      */
     public void saveToItemStack(ItemStack stack) {
         if (stack == null || stack.isEmpty()) return;
         CompoundTag tag = stack.getOrCreateTag();
         if (isEmpty()) {
             tag.remove(AMMO_STACK_TAG);
-            tag.remove(LEGACY_AMMO_ID_TAG);
-            tag.putInt(LEGACY_AMMO_COUNT_TAG, 0);
         } else {
             tag.put(AMMO_STACK_TAG, serializeNBT());
-            tag.putString(LEGACY_AMMO_ID_TAG, peek().toString());
-            tag.putInt(LEGACY_AMMO_COUNT_TAG, getTotalCount());
         }
     }
 

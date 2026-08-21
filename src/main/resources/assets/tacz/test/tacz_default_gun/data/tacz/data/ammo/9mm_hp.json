@@ -1,0 +1,8 @@
+{
+  "parent_ammo": "tacz:9mm",
+  "damage": 9.0,
+  "speed": 140.0,
+  "knockback": 0.15,
+  "friction": 0.03,
+  "pierce": 1
+}

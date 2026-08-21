@@ -1,0 +1,9 @@
+{
+  "parent_ammo": "tacz:9mm",
+  "damage": 6.5,
+  "speed": 155.0,
+  "knockback": 0.0,
+  "friction": 0.025,
+  "pierce": 1,
+  "tracer_color": "#00FF44"
+}

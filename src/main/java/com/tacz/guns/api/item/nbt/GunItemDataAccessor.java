@@ -25,6 +25,7 @@ public interface GunItemDataAccessor extends IGun {
     String GUN_ID_TAG = "GunId";
     String GUN_FIRE_MODE_TAG = "GunFireMode";
     String GUN_HAS_BULLET_IN_BARREL = "HasBulletInBarrel";
+    String GUN_BARREL_AMMO_ID = "BarrelAmmoId";
     String GUN_CURRENT_AMMO_COUNT_TAG = "GunCurrentAmmoCount";
     String GUN_ATTACHMENT_BASE = "Attachment";
     String GUN_EXP_TAG = "GunLevelExp";
@@ -217,13 +218,14 @@ public interface GunItemDataAccessor extends IGun {
     default void reduceCurrentAmmoCount(ItemStack gun) {
         // 只在不使用背包直读的情况下减少 AmmoCount
         if (!useInventoryAmmo(gun)) {
+            ResourceLocation popped = null;
             fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(gun);
             if (cap.hasMagazine()) {
                 ItemStack stored = cap.getStoredMagazine();
                 if (!stored.isEmpty()) {
                     fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(stored);
                     if (!stack.isEmpty()) {
-                        stack.pop();
+                        popped = stack.pop();
                         stack.saveToItemStack(stored);
                         cap.setStoredMagazine(stored);
                     }
@@ -231,9 +233,12 @@ public interface GunItemDataAccessor extends IGun {
             } else {
                 fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(gun);
                 if (!stack.isEmpty()) {
-                    stack.pop();
+                    popped = stack.pop();
                     stack.saveToItemStack(gun);
                 }
+            }
+            if (popped != null && hasBulletInBarrel(gun)) {
+                setBarrelAmmoId(gun, popped);
             }
             setCurrentAmmoCount(gun, getCurrentAmmoCount(gun) - 1);
         }
@@ -377,6 +382,32 @@ public interface GunItemDataAccessor extends IGun {
     default void setBulletInBarrel(ItemStack gun, boolean bulletInBarrel) {
         CompoundTag nbt = gun.getOrCreateTag();
         nbt.putBoolean(GUN_HAS_BULLET_IN_BARREL, bulletInBarrel);
+        if (!bulletInBarrel) {
+            setBarrelAmmoId(gun, null);
+        }
+    }
+
+    @Override
+    @Nullable
+    default ResourceLocation getBarrelAmmoId(ItemStack gun) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        if (nbt.contains(GUN_BARREL_AMMO_ID, Tag.TAG_STRING)) {
+            String str = nbt.getString(GUN_BARREL_AMMO_ID);
+            if (!str.isEmpty()) {
+                return new ResourceLocation(str);
+            }
+        }
+        return null;
+    }
+
+    @Override
+    default void setBarrelAmmoId(ItemStack gun, @Nullable ResourceLocation ammoId) {
+        CompoundTag nbt = gun.getOrCreateTag();
+        if (ammoId != null) {
+            nbt.putString(GUN_BARREL_AMMO_ID, ammoId.toString());
+        } else {
+            nbt.remove(GUN_BARREL_AMMO_ID);
+        }
     }
 
     @Override

@@ -79,7 +79,9 @@ public final class MagazineReloadSource {
     private static ItemStack extractSelected(IItemHandler inventory, ItemStack gun, int slot) {
         if (slot < 0 || slot >= inventory.getSlots()) return ItemStack.EMPTY;
         ItemStack stack = inventory.getStackInSlot(slot);
-        if (isUsableDirect(stack, gun)) return inventory.extractItem(slot, 1, false);
+        if (stack.getItem() instanceof MagazineItem magItem && magItem.isAmmoBoxOfGun(gun, stack)) {
+            return inventory.extractItem(slot, 1, false);
+        }
         if (isAllTypeCreativeBox(stack)) return createFullMagazineForGun(gun);
 
         ItemStack result = AmmoBoxMagazineStorage.extractBestCompatible(stack, gun);

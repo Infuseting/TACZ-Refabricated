@@ -50,9 +50,13 @@ public class EntityBulletRenderer extends EntityRenderer<EntityKineticBullet> {
         if (display.isEmpty()) {
             return;
         }
-        float @Nullable [] tracerColor = bullet.getTracerColorOverride().orElse(display.get().getTracerColor());
         ResourceLocation ammoId = bullet.getAmmoId();
-        TimelessAPI.getClientAmmoIndex(ammoId).ifPresent(ammoIndex -> {
+        Optional<com.tacz.guns.client.resource.index.ClientAmmoIndex> initialIndex = TimelessAPI.getClientAmmoIndex(ammoId);
+        final Optional<com.tacz.guns.client.resource.index.ClientAmmoIndex> clientAmmoIndexOpt = initialIndex.isPresent()
+                ? initialIndex
+                : TimelessAPI.getClientAmmoIndex(fr.infuseting.tacz.ammo.AmmoStack.getParentOrSelf(ammoId));
+
+        clientAmmoIndexOpt.ifPresent(ammoIndex -> {
             BedrockAmmoModel ammoEntityModel = ammoIndex.getAmmoEntityModel();
             ResourceLocation textureLocation = ammoIndex.getAmmoEntityTextureLocation();
             if (ammoEntityModel != null && textureLocation != null) {
@@ -64,13 +68,20 @@ public class EntityBulletRenderer extends EntityRenderer<EntityKineticBullet> {
                 ammoEntityModel.render(poseStack, ItemDisplayContext.GROUND, RenderType.entityTranslucentCull(textureLocation), packedLight, OverlayTexture.NO_OVERLAY);
                 poseStack.popPose();
             }
-
-            // 曳光弹发光
-            if (bullet.isTracerAmmo()) {
-                float[] actualTracerColor = Objects.requireNonNullElse(tracerColor, ammoIndex.getTracerColor());
-                renderTracerAmmo(bullet, actualTracerColor, partialTicks, poseStack, packedLight);
-            }
         });
+
+        // 曳光弹发光
+        if (bullet.isTracerAmmo()) {
+            var ammoDataOpt = TimelessAPI.getCommonAmmoData(ammoId);
+            float[] tracerColor = bullet.getTracerColorOverride()
+                    .or(() -> ammoDataOpt.flatMap(ad -> Optional.ofNullable(ad.getTracerColor()).map(com.tacz.guns.util.ColorHex::colorTextToRbgFloatArray)))
+                    .or(() -> clientAmmoIndexOpt.map(com.tacz.guns.client.resource.index.ClientAmmoIndex::getTracerColor))
+                    .orElse(display.get().getTracerColor());
+            if (tracerColor == null) {
+                tracerColor = new float[]{0.0f, 1.0f, 0.27f};
+            }
+            renderTracerAmmo(bullet, tracerColor, partialTicks, poseStack, packedLight);
+        }
     }
 
     public void renderTracerAmmo(EntityKineticBullet bullet, float[] tracerColor, float partialTicks, PoseStack poseStack, int packedLight) {

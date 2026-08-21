@@ -252,11 +252,13 @@ public class MagazineLoadingHandler {
 
             ResourceLocation loadedAmmo = magItem.getAmmoId(magazine);
             if (!DefaultAssets.EMPTY_AMMO_ID.equals(loadedAmmo)
-                    && !loadedAmmo.equals(familyAmmo)) return;
+                    && !fr.infuseting.tacz.ammo.AmmoStack.isAmmoCompatible(familyAmmo, loadedAmmo)) return;
 
             extras = splitMagazineStack(magazine);
-            magItem.setAmmoId(magazine, familyAmmo);
-            magItem.setAmmoCount(magazine, current + 1);
+            fr.infuseting.tacz.ammo.AmmoStack ammoStack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(magazine);
+            ammoStack.push(familyAmmo, 1);
+            ammoStack.saveToItemStack(magazine);
+            MagazineItem.setChecked(magazine, false);
             SoundRegistrar.playMagazineLoad(player);
         }
 
@@ -277,11 +279,13 @@ public class MagazineLoadingHandler {
 
         ResourceLocation loadedAmmo = magItem.getAmmoId(magazine);
         if (!DefaultAssets.EMPTY_AMMO_ID.equals(loadedAmmo)
-                    && !loadedAmmo.equals(familyAmmo)) return;
+                && !fr.infuseting.tacz.ammo.AmmoStack.isAmmoCompatible(familyAmmo, loadedAmmo)) return;
 
         ItemStack extras = splitMagazineStack(magazine);
-        magItem.setAmmoId(magazine, familyAmmo);
-        magItem.setAmmoCount(magazine, current + 1);
+        fr.infuseting.tacz.ammo.AmmoStack ammoStack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(magazine);
+        ammoStack.push(familyAmmo, 1);
+        ammoStack.saveToItemStack(magazine);
+        MagazineItem.setChecked(magazine, false);
         returnSplitMagazines(player, extras);
         syncCreativeInventory(player, player.getInventory().selected, !extras.isEmpty());
         SoundRegistrar.playMagazineLoad(player);
@@ -405,12 +409,10 @@ public class MagazineLoadingHandler {
         if (familyId == null) return false;
         ResourceLocation familyAmmo = MagazineFamilySystem.getAmmoTypeForFamily(familyId);
         if (familyAmmo == null) return false;
-        ResourceLocation magAmmoId = magItem.getAmmoId(mag);
 
         for (ItemStack source : player.getInventory().items) {
             ResourceLocation ammoId = MagazineAmmoSource.compatibleAmmoId(source, familyAmmo);
             if (ammoId == null) continue;
-            if (!DefaultAssets.EMPTY_AMMO_ID.equals(magAmmoId) && !magAmmoId.equals(ammoId)) continue;
             if (MagazineAmmoSource.available(source) > 0) return true;
         }
         return false;

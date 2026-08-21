@@ -241,6 +241,14 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
             if (ammoData.getPierce() != null) {
                 this.pierce = Math.max(1, ammoData.getPierce());
             }
+            if (ammoData.getTracerColor() != null) {
+                this.isTracerAmmo = true;
+                float[] rgb = com.tacz.guns.util.ColorHex.colorTextToRbgFloatArray(ammoData.getTracerColor());
+                int[] intRgb = new int[]{(int) (rgb[0] * 255), (int) (rgb[1] * 255), (int) (rgb[2] * 255), 255};
+                ((IEntityPersistentData) this).tacz$getPersistentData().putIntArray(TRACER_COLOR_OVERRIDER_KEY, intRgb);
+            } else {
+                this.isTracerAmmo = false;
+            }
         }
     }
 
@@ -543,17 +551,36 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
     // 根据距离进行伤害衰减设计
     public float getDamage(Vec3 hitVec) {
         float base = 0;
+        double playerDistance = hitVec.distanceTo(this.startPos);
+        DistanceDamagePair matchedPair = null;
+        for (DistanceDamagePair pair : this.damageAmount) {
+            float effectiveDistance = this.damageAmount.get(0).getDistance() == pair.getDistance() ? this.distanceAmount : pair.getDistance();
+            if (playerDistance < effectiveDistance) {
+                matchedPair = pair;
+                break;
+            }
+        }
+        if (matchedPair == null && !this.damageAmount.isEmpty()) {
+            matchedPair = this.damageAmount.getLast();
+        }
+
+        float distMultiplier = 1.0f;
+        if (matchedPair != null) {
+            if (matchedPair.getMultiplier() != null) {
+                distMultiplier = matchedPair.getMultiplier();
+            } else if (!this.damageAmount.isEmpty() && this.damageAmount.get(0).getDamage() > 0) {
+                distMultiplier = matchedPair.getDamage() / this.damageAmount.get(0).getDamage();
+            }
+        }
+
         if (this.overrideDamage != null) {
-            base = Math.max(this.overrideDamage * this.gunDamageMultiplier * this.damageModifier, 0F);
-        } else {
-            double playerDistance = hitVec.distanceTo(this.startPos);
-            for (DistanceDamagePair pair : this.damageAmount) {
-                float effectiveDistance = this.damageAmount.get(0).getDistance() == pair.getDistance() ? this.distanceAmount : pair.getDistance();
-                if (playerDistance < effectiveDistance) {
-                    float damage = pair.getDamage();
-                    base = Math.max(damage * this.damageModifier, 0F);
-                    break;
-                }
+            base = Math.max(this.overrideDamage * this.gunDamageMultiplier * distMultiplier * this.damageModifier, 0F);
+        } else if (matchedPair != null) {
+            if (matchedPair.getMultiplier() != null) {
+                float firstDamage = !this.damageAmount.isEmpty() ? this.damageAmount.get(0).getDamage() : 0f;
+                base = Math.max(firstDamage * distMultiplier * this.gunDamageMultiplier * this.damageModifier, 0F);
+            } else {
+                base = Math.max(matchedPair.getDamage() * this.gunDamageMultiplier * this.damageModifier, 0F);
             }
         }
         float modifiedDamage = modifyProperty(GunProperties.DAMAGE, Float.class, base);
@@ -643,6 +670,14 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
         buffer.writeFloat(this.friction);
         buffer.writeInt(this.pierce);
         buffer.writeBoolean(this.isTracerAmmo);
+        Optional<float[]> tracerOverride = getTracerColorOverride();
+        buffer.writeBoolean(tracerOverride.isPresent());
+        if (tracerOverride.isPresent()) {
+            float[] rgb = tracerOverride.get();
+            buffer.writeFloat(rgb[0]);
+            buffer.writeFloat(rgb[1]);
+            buffer.writeFloat(rgb[2]);
+        }
         buffer.writeResourceLocation(this.gunId);
         buffer.writeResourceLocation(this.gunDisplayId);
     }
@@ -668,6 +703,14 @@ public class EntityKineticBullet extends Projectile implements IEntityAdditional
         this.friction = additionalData.readFloat();
         this.pierce = additionalData.readInt();
         this.isTracerAmmo = additionalData.readBoolean();
+        boolean hasTracerColor = additionalData.readBoolean();
+        if (hasTracerColor) {
+            float r = additionalData.readFloat();
+            float g = additionalData.readFloat();
+            float b = additionalData.readFloat();
+            int[] intRgb = new int[]{(int) (r * 255), (int) (g * 255), (int) (b * 255), 255};
+            ((IEntityPersistentData) this).tacz$getPersistentData().putIntArray(TRACER_COLOR_OVERRIDER_KEY, intRgb);
+        }
         this.gunId = additionalData.readResourceLocation();
         this.gunDisplayId = additionalData.readResourceLocation();
     }

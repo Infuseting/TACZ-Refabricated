@@ -1,5 +1,6 @@
 {
   "ammo": "tacz:9mm",
+  "damage_multiplier": 1.0,
   "rpm": 400,
   "script": "tacz:xmag_reload_logic",
   "script_param": {
@@ -24,14 +25,14 @@
     "life": 0.8,
     "bullet_amount": 1,
     "damage": 6,
-    "tracer_count_interval": 0,
+    "tracer_count_interval": -1,
     "extra_damage": {
       "armor_ignore": 0,
       "head_shot_multiplier": 1.5,
       "damage_adjust": [
-        {"distance": 18, "damage": 7},
-        {"distance": 45, "damage": 5},
-        {"distance": "infinite", "damage": 4}
+        {"distance": 18, "multiplier": 1.0},
+        {"distance": 45, "multiplier": 0.8},
+        {"distance": "infinite", "multiplier": 0.6}
       ]
     },
     "speed": 150,

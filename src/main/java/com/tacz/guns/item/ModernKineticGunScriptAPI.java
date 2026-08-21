@@ -181,24 +181,39 @@ public class ModernKineticGunScriptAPI {
                 float yaw = yawSupplier != null ? yawSupplier.get() : shooter.getYRot();
                 // 生成子弹
                 Level world = shooter.level();
-                ResourceLocation ammoId = gunData.getAmmoId();
-                fr.infuseting.tacz.capability.GunMagazineCapability magCap = fr.infuseting.tacz.capability.GunMagazineCapability.of(itemStack);
-                if (magCap.hasMagazine()) {
-                    ItemStack storedMag = magCap.getStoredMagazine();
-                    if (!storedMag.isEmpty()) {
-                        fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(storedMag);
+                ResourceLocation ammoId = null;
+                Bolt boltType = gunData.getBolt();
+                if (boltType == Bolt.CLOSED_BOLT && abstractGunItem.hasBulletInBarrel(itemStack)) {
+                    ammoId = abstractGunItem.getBarrelAmmoId(itemStack);
+                }
+                if (ammoId == null) {
+                    fr.infuseting.tacz.capability.GunMagazineCapability magCap = fr.infuseting.tacz.capability.GunMagazineCapability.of(itemStack);
+                    if (magCap.hasMagazine()) {
+                        ItemStack storedMag = magCap.getStoredMagazine();
+                        if (!storedMag.isEmpty()) {
+                            fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(storedMag);
+                            if (!stack.isEmpty()) {
+                                ammoId = stack.peek();
+                            }
+                        }
+                    } else {
+                        fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(itemStack);
                         if (!stack.isEmpty()) {
                             ammoId = stack.peek();
                         }
                     }
-                } else {
-                    fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(itemStack);
-                    if (!stack.isEmpty()) {
-                        ammoId = stack.peek();
-                    }
                 }
+                if (ammoId == null) {
+                    ammoId = gunData.getAmmoId();
+                }
+
+                var ammoDataOpt = com.tacz.guns.api.TimelessAPI.getCommonAmmoData(ammoId);
+                boolean isTracer = ammoDataOpt.map(ad -> ad.getTracerColor() != null).orElse(false);
+                if (!isTracer && bulletData.hasTracerAmmo()) {
+                    isTracer = gunOperator.nextBulletIsTracer(bulletData.getTracerCountInterval());
+                }
+
                 for (int i = 0; i < bulletAmount; i++) {
-                    boolean isTracer = bulletData.hasTracerAmmo() && gunOperator.nextBulletIsTracer(bulletData.getTracerCountInterval());
                     EntityKineticBullet bullet = new EntityKineticBullet(world, shooter, itemStack, ammoId, gunId,
                             gunDisplayId, isTracer, gunData, bulletData);
                     bullet.applyShotgunDamageSpread(bulletAmount);
@@ -630,17 +645,41 @@ public class ModernKineticGunScriptAPI {
      * @return 成功移除的数量
      */
     public int removeAmmoFromMagazine(int amount) {
-        if (amount < 0) {
+        if (amount <= 0) {
             return 0;
         }
         int currentAmmoCount = abstractGunItem.getCurrentAmmoCount(itemStack);
-        if (currentAmmoCount < amount) {
-            abstractGunItem.setCurrentAmmoCount(itemStack, 0);
-            return currentAmmoCount;
-        } else {
-            abstractGunItem.setCurrentAmmoCount(itemStack, currentAmmoCount - amount);
-            return amount;
+        if (currentAmmoCount <= 0) {
+            return 0;
         }
+
+        ResourceLocation popped = null;
+        fr.infuseting.tacz.capability.GunMagazineCapability cap = fr.infuseting.tacz.capability.GunMagazineCapability.of(itemStack);
+        if (cap.hasMagazine()) {
+            ItemStack stored = cap.getStoredMagazine();
+            if (!stored.isEmpty()) {
+                fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(stored);
+                if (!stack.isEmpty()) {
+                    popped = stack.pop();
+                    stack.saveToItemStack(stored);
+                    cap.setStoredMagazine(stored);
+                }
+            }
+        } else {
+            fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(itemStack);
+            if (!stack.isEmpty()) {
+                popped = stack.pop();
+                stack.saveToItemStack(itemStack);
+            }
+        }
+
+        if (popped != null) {
+            abstractGunItem.setBarrelAmmoId(itemStack, popped);
+        }
+
+        int removed = Math.min(currentAmmoCount, amount);
+        abstractGunItem.setCurrentAmmoCount(itemStack, currentAmmoCount - removed);
+        return removed;
     }
 
     /**

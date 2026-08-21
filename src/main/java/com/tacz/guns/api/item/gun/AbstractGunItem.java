@@ -134,12 +134,10 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
     private static void writeGunAmmoToMagazine(ItemStack magazine, int ammo, ResourceLocation ammoId) {
         if (!(magazine.getItem() instanceof fr.infuseting.tacz.item.MagazineItem magItem)) return;
-        if (ammo > 0 && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
-            magItem.setAmmoId(magazine, ammoId);
-            magItem.setAmmoCount(magazine, ammo);
-        } else {
-            magItem.setAmmoCount(magazine, 0);
-            magItem.setAmmoId(magazine, DefaultAssets.EMPTY_AMMO_ID);
+        fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(magazine);
+        if (stack.isEmpty() && ammo > 0 && ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+            stack.push(ammoId, ammo);
+            stack.saveToItemStack(magazine);
         }
     }
 
@@ -281,13 +279,26 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
 
             if (!hadMagazine) {
                 boolean hasBulletInBarrel = hasBulletInBarrel(gunItem);
-                int count = (hasBulletInBarrel ? 1 : 0) + remaining;
-                if (count > 0 && ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
-                    ItemStack bullet = AmmoItemBuilder.create().setId(ammoId).setCount(count).build();
+                ResourceLocation barrelAmmo = getBarrelAmmoId(gunItem);
+                if (hasBulletInBarrel && barrelAmmo != null && !DefaultAssets.EMPTY_AMMO_ID.equals(barrelAmmo)) {
+                    ItemStack bullet = AmmoItemBuilder.create().setId(barrelAmmo).setCount(1).build();
                     if (!player.getInventory().add(bullet)) player.drop(bullet, false);
-                    setBulletInBarrel(gunItem, false);
-                    setCurrentAmmoCount(gunItem, 0);
                 }
+                setBulletInBarrel(gunItem, false);
+
+                fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(gunItem);
+                if (!stack.isEmpty()) {
+                    fr.infuseting.tacz.ammo.AmmoStack popped = stack.pop(stack.getTotalCount());
+                    for (fr.infuseting.tacz.ammo.AmmoStack.AmmoEntry entry : popped.getEntries()) {
+                        ItemStack bullet = AmmoItemBuilder.create().setId(entry.getId()).setCount(entry.getCount()).build();
+                        if (!player.getInventory().add(bullet)) player.drop(bullet, false);
+                    }
+                    stack.saveToItemStack(gunItem);
+                } else if (remaining > 0 && ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+                    ItemStack bullet = AmmoItemBuilder.create().setId(ammoId).setCount(remaining).build();
+                    if (!player.getInventory().add(bullet)) player.drop(bullet, false);
+                }
+                setCurrentAmmoCount(gunItem, 0);
             }
             return;
         }
@@ -430,12 +441,15 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
             fr.infuseting.tacz.TaCZMagazines.LOGGER.debug("Loaded magazine with {} rounds", ammo);
             return ammo;
         }
+        fr.infuseting.tacz.ammo.AmmoStack gunStack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(gunItem);
         int cnt = needAmmoCount;
         // 背包检查
         for (int i = 0; i < itemHandler.getSlots(); i++) {
             ItemStack checkAmmoStack = itemHandler.getStackInSlot(i);
             if (checkAmmoStack.getItem() instanceof IAmmo iAmmo && iAmmo.isAmmoOfGun(gunItem, checkAmmoStack)) {
                 ItemStack extractItem = itemHandler.extractItem(i, cnt, false);
+                ResourceLocation ammoType = iAmmo.getAmmoId(extractItem);
+                gunStack.push(ammoType, extractItem.getCount());
                 cnt = cnt - extractItem.getCount();
                 if (cnt <= 0) {
                     break;
@@ -444,6 +458,8 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
             if (checkAmmoStack.getItem() instanceof IAmmoBox iAmmoBox && iAmmoBox.isAmmoBoxOfGun(gunItem, checkAmmoStack)) {
                 int boxAmmoCount = iAmmoBox.getAmmoCount(checkAmmoStack);
                 int extractCount = Math.min(boxAmmoCount, cnt);
+                ResourceLocation ammoType = iAmmoBox.getAmmoId(checkAmmoStack);
+                gunStack.push(ammoType, extractCount);
                 int remainCount = boxAmmoCount - extractCount;
                 iAmmoBox.setAmmoCount(checkAmmoStack, remainCount);
                 if (remainCount <= 0) {
@@ -455,6 +471,7 @@ public abstract class AbstractGunItem extends Item implements IGun, IAnimationIt
                 }
             }
         }
+        gunStack.saveToItemStack(gunItem);
         return needAmmoCount - cnt;
     }
 

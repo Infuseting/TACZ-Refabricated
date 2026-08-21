@@ -351,6 +351,17 @@ public interface IGun {
     void setBulletInBarrel(ItemStack gun, boolean bulletInBarrel);
 
     /**
+     * 获取枪管中的子弹类型 ID
+     */
+    @org.jetbrains.annotations.Nullable
+    ResourceLocation getBarrelAmmoId(ItemStack gun);
+
+    /**
+     * 设置枪管中的子弹类型 ID
+     */
+    void setBarrelAmmoId(ItemStack gun, @org.jetbrains.annotations.Nullable ResourceLocation ammoId);
+
+    /**
      * 枪械是否为备弹直读
      */
     boolean useInventoryAmmo(ItemStack gun);

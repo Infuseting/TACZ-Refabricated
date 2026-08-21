@@ -38,24 +38,42 @@ public class UnloadGunMagPacket {
         GunMagazineCapability magCap = GunMagazineCapability.of(gun);
         if (!magCap.hasMagazine()) {
             boolean hasBulletInBarrel = iGun.hasBulletInBarrel(gun);
-            int currentAmmo = abstractGun.getCurrentAmmoCount(gun);
-            int count = (hasBulletInBarrel ? 1 : 0) + currentAmmo;
-
-            if (count > 0) {
-                TimelessAPI.getCommonGunIndex(gunId).ifPresent(idx -> {
-                    ResourceLocation ammoId = idx.getGunData().getAmmoId();
-                    if (ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
-                        ItemStack bullet = AmmoItemBuilder.create().setId(ammoId).setCount(count).build();
-                        if (!player.getInventory().add(bullet)) {
-                            player.drop(bullet, false);
-                        }
-                    }
-                });
-
-                iGun.setBulletInBarrel(gun, false);
-                abstractGun.setCurrentAmmoCount(gun, 0);
-                SoundRegistrar.playMagazineUnload(player);
+            ResourceLocation barrelAmmo = iGun.getBarrelAmmoId(gun);
+            if (hasBulletInBarrel && barrelAmmo != null && !DefaultAssets.EMPTY_AMMO_ID.equals(barrelAmmo)) {
+                ItemStack bullet = AmmoItemBuilder.create().setId(barrelAmmo).setCount(1).build();
+                if (!player.getInventory().add(bullet)) {
+                    player.drop(bullet, false);
+                }
             }
+            iGun.setBulletInBarrel(gun, false);
+
+            fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(gun);
+            if (!stack.isEmpty()) {
+                fr.infuseting.tacz.ammo.AmmoStack popped = stack.pop(stack.getTotalCount());
+                for (fr.infuseting.tacz.ammo.AmmoStack.AmmoEntry entry : popped.getEntries()) {
+                    ItemStack bullet = AmmoItemBuilder.create().setId(entry.getId()).setCount(entry.getCount()).build();
+                    if (!player.getInventory().add(bullet)) {
+                        player.drop(bullet, false);
+                    }
+                }
+                stack.saveToItemStack(gun);
+            } else {
+                int currentAmmo = abstractGun.getCurrentAmmoCount(gun);
+                if (currentAmmo > 0) {
+                    TimelessAPI.getCommonGunIndex(gunId).ifPresent(idx -> {
+                        ResourceLocation ammoId = idx.getGunData().getAmmoId();
+                        if (ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+                            ItemStack bullet = AmmoItemBuilder.create().setId(ammoId).setCount(currentAmmo).build();
+                            if (!player.getInventory().add(bullet)) {
+                                player.drop(bullet, false);
+                            }
+                        }
+                    });
+                }
+            }
+
+            abstractGun.setCurrentAmmoCount(gun, 0);
+            SoundRegistrar.playMagazineUnload(player);
             return;
         }
 
@@ -63,19 +81,19 @@ public class UnloadGunMagPacket {
 
         // Write the remaining in-gun ammo back into the magazine before ejecting
         if (storedMag.getItem() instanceof MagazineItem magItem) {
-            int remaining = abstractGun.getCurrentAmmoCount(gun);
-            final ItemStack magForLambda = storedMag;
-            if (remaining > 0) {
-                TimelessAPI.getCommonGunIndex(gunId).ifPresent(idx -> {
-                    ResourceLocation ammoId = idx.getGunData().getAmmoId();
-                    if (!DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
-                        magItem.setAmmoId(magForLambda, ammoId);
-                        magItem.setAmmoCount(magForLambda, remaining);
-                    }
-                });
-            } else {
-                magItem.setAmmoCount(storedMag, 0);
-                magItem.setAmmoId(storedMag, DefaultAssets.EMPTY_AMMO_ID);
+            fr.infuseting.tacz.ammo.AmmoStack stack = fr.infuseting.tacz.ammo.AmmoStack.fromItemStack(storedMag);
+            if (stack.isEmpty()) {
+                int remaining = abstractGun.getCurrentAmmoCount(gun);
+                final ItemStack magToUpdate = storedMag;
+                if (remaining > 0) {
+                    TimelessAPI.getCommonGunIndex(gunId).ifPresent(idx -> {
+                        ResourceLocation ammoId = idx.getGunData().getAmmoId();
+                        if (!DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+                            stack.push(ammoId, remaining);
+                            stack.saveToItemStack(magToUpdate);
+                        }
+                    });
+                }
             }
             magCap.setStoredMagazine(storedMag);
             storedMag = magCap.getStoredMagazine();

@@ -17,28 +17,38 @@ public class DistanceDamagePairSerializer implements JsonDeserializer<ExtraDamag
         if (!jsonObject.has("distance")) {
             throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because it's not has distance field");
         }
-        if (!jsonObject.has("damage")) {
-            throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because it's not has damage field");
+        if (!jsonObject.has("damage") && !jsonObject.has("multiplier") && !jsonObject.has("damage_multiplier")) {
+            throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because it has neither damage nor multiplier field");
         }
         if (!jsonObject.get("distance").isJsonPrimitive()) {
-            throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because it distance field is not a string or number");
-        }
-        if (!jsonObject.get("damage").isJsonPrimitive()) {
-            throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because it damage field is not a number");
+            throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because distance field is not a string or number");
         }
         float distance = 0;
-        float damage;
-        JsonPrimitive jsonPrimitive = jsonObject.get("distance").getAsJsonPrimitive();
-        if (jsonPrimitive.isNumber()) {
-            distance = jsonPrimitive.getAsFloat();
-        } else if (jsonPrimitive.isString()) {
-            if (INFINITE.equals(jsonPrimitive.getAsString())) {
+        JsonPrimitive distPrimitive = jsonObject.get("distance").getAsJsonPrimitive();
+        if (distPrimitive.isNumber()) {
+            distance = distPrimitive.getAsFloat();
+        } else if (distPrimitive.isString()) {
+            if (INFINITE.equalsIgnoreCase(distPrimitive.getAsString())) {
                 distance = Float.MAX_VALUE;
             } else {
-                throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because it distance field is not is '" + INFINITE + "'");
+                throw new JsonSyntaxException("Expected " + json + " to be a DistanceDamagePair because distance field is not '" + INFINITE + "'");
             }
         }
-        damage = jsonObject.get("damage").getAsFloat();
-        return new ExtraDamage.DistanceDamagePair(distance, damage);
+
+        Float multiplier = null;
+        if (jsonObject.has("multiplier") && jsonObject.get("multiplier").isJsonPrimitive() && jsonObject.get("multiplier").getAsJsonPrimitive().isNumber()) {
+            multiplier = jsonObject.get("multiplier").getAsFloat();
+        } else if (jsonObject.has("damage_multiplier") && jsonObject.get("damage_multiplier").isJsonPrimitive() && jsonObject.get("damage_multiplier").getAsJsonPrimitive().isNumber()) {
+            multiplier = jsonObject.get("damage_multiplier").getAsFloat();
+        }
+
+        float damage = 0f;
+        if (jsonObject.has("damage") && jsonObject.get("damage").isJsonPrimitive() && jsonObject.get("damage").getAsJsonPrimitive().isNumber()) {
+            damage = jsonObject.get("damage").getAsFloat();
+        } else if (multiplier != null) {
+            damage = multiplier;
+        }
+
+        return new ExtraDamage.DistanceDamagePair(distance, damage, multiplier);
     }
 }

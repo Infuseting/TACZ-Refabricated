@@ -64,11 +64,11 @@ public class DamageModifier implements IAttachmentModifier<Modifier, LinkedList<
         if (extraDamage != null && extraDamage.getDamageAdjust() != null) {
             for (DistanceDamagePair pair : extraDamage.getDamageAdjust()) {
                 float finalBaseDamage = pair.getDamage() + fireAdjustDamageAmount;
-                cacheValue.add(new DistanceDamagePair(pair.getDistance(), (float) (finalBaseDamage * SyncConfig.DAMAGE_BASE_MULTIPLIER.get())));
+                cacheValue.add(new DistanceDamagePair(pair.getDistance(), (float) (finalBaseDamage * SyncConfig.DAMAGE_BASE_MULTIPLIER.get()), pair.getMultiplier()));
             }
         } else {
             float finalBaseDamage = rawDamage + fireAdjustDamageAmount;
-            cacheValue.add(new DistanceDamagePair(Integer.MAX_VALUE, (float) (finalBaseDamage * SyncConfig.DAMAGE_BASE_MULTIPLIER.get())));
+            cacheValue.add(new DistanceDamagePair(Integer.MAX_VALUE, (float) (finalBaseDamage * SyncConfig.DAMAGE_BASE_MULTIPLIER.get()), 1.0f));
         }
         return new CacheValue<>(cacheValue);
     }
@@ -80,7 +80,7 @@ public class DamageModifier implements IAttachmentModifier<Modifier, LinkedList<
         for (DistanceDamagePair pair : cacheValue) {
             float base = pair.getDamage();
             float eval = (float) AttachmentPropertyManager.eval(modifiers, base);
-            modifiedValue.add(new DistanceDamagePair(pair.getDistance(), eval));
+            modifiedValue.add(new DistanceDamagePair(pair.getDistance(), eval, pair.getMultiplier()));
         }
         cache.setValue(modifiedValue);
     }
@@ -102,8 +102,13 @@ public class DamageModifier implements IAttachmentModifier<Modifier, LinkedList<
         // 开火模式调整
         // 最终的 base 伤害
         float finalBase = fireModeAdjustData != null ? fireModeAdjustData.getDamageAmount() : 0f;
-        if (extraDamage != null && extraDamage.getDamageAdjust() != null) {
-            finalBase += extraDamage.getDamageAdjust().get(0).getDamage();
+        if (extraDamage != null && extraDamage.getDamageAdjust() != null && !extraDamage.getDamageAdjust().isEmpty()) {
+            DistanceDamagePair firstPair = extraDamage.getDamageAdjust().get(0);
+            if (firstPair.getMultiplier() != null) {
+                finalBase += rawDamage * firstPair.getMultiplier();
+            } else {
+                finalBase += firstPair.getDamage();
+            }
         } else {
             finalBase += rawDamage;
         }

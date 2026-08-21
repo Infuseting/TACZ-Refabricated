@@ -106,28 +106,12 @@ public class MagazineItem extends Item implements IAmmoBox {
 
     @Override
     public ResourceLocation getAmmoId(ItemStack magazine) {
-        AmmoStack stack = AmmoStack.fromItemStack(magazine);
-        if (!stack.isEmpty()) {
-            return stack.peek();
-        }
-        CompoundTag tag = magazine.getTag();
-        if (tag != null && tag.contains(AMMO_ID_TAG, Tag.TAG_STRING)) {
-            return new ResourceLocation(tag.getString(AMMO_ID_TAG));
-        }
-        return DefaultAssets.EMPTY_AMMO_ID;
+        return AmmoStack.fromItemStack(magazine).peek();
     }
 
     @Override
     public int getAmmoCount(ItemStack magazine) {
-        AmmoStack stack = AmmoStack.fromItemStack(magazine);
-        if (!stack.isEmpty()) {
-            return stack.getTotalCount();
-        }
-        CompoundTag tag = magazine.getTag();
-        if (tag != null && tag.contains(AMMO_COUNT_TAG, Tag.TAG_INT)) {
-            return tag.getInt(AMMO_COUNT_TAG);
-        }
-        return 0;
+        return AmmoStack.fromItemStack(magazine).getTotalCount();
     }
 
     @Override
@@ -239,9 +223,6 @@ public class MagazineItem extends Item implements IAmmoBox {
                 : MagazineAmmoSource.compatibleAmmoId(other, familyAmmo);
         if (heldAmmoId == null || heldAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) return false;
 
-        ResourceLocation magAmmoId = this.getAmmoId(stack);
-        if (!magAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID) && !heldAmmoId.equals(magAmmoId)) return false;
-
         int maxCapacity  = getMaxCapacity(stack);
         int magAmmoCount = this.getAmmoCount(stack);
         if (magAmmoCount >= maxCapacity) return false;
@@ -259,8 +240,11 @@ public class MagazineItem extends Item implements IAmmoBox {
                 if (!player.getInventory().add(extras)) player.drop(extras, false);
             }
 
-            this.setAmmoId(stack, heldAmmoId);
-            this.setAmmoCount(stack, magAmmoCount + 1);
+            AmmoStack ammoStack = AmmoStack.fromItemStack(stack);
+            ammoStack.push(heldAmmoId, 1);
+            ammoStack.saveToItemStack(stack);
+            setChecked(stack, false);
+
             if (!player.getAbilities().instabuild) {
                 MagazineAmmoSource.consume(other, 1);
             }
@@ -279,8 +263,11 @@ public class MagazineItem extends Item implements IAmmoBox {
                 if (!player.getInventory().add(extras)) player.drop(extras, false);
             }
 
-            this.setAmmoId(stack, heldAmmoId);
-            this.setAmmoCount(stack, magAmmoCount + transfer);
+            AmmoStack ammoStack = AmmoStack.fromItemStack(stack);
+            ammoStack.push(heldAmmoId, transfer);
+            ammoStack.saveToItemStack(stack);
+            setChecked(stack, false);
+
             if (!player.getAbilities().instabuild) {
                 MagazineAmmoSource.consume(other, transfer);
             }
@@ -345,9 +332,6 @@ public class MagazineItem extends Item implements IAmmoBox {
                 ? familyAmmoType
                 : MagazineAmmoSource.compatibleAmmoId(heldStack, familyAmmoType);
         if (heldAmmoId == null || heldAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID)) return false;
-
-        ResourceLocation magAmmoId = this.getAmmoId(magazine);
-        if (!magAmmoId.equals(DefaultAssets.EMPTY_AMMO_ID) && !heldAmmoId.equals(magAmmoId)) return false;
 
         int maxCapacity  = getMaxCapacity(magazine);
         int magAmmoCount = this.getAmmoCount(magazine);
@@ -709,15 +693,18 @@ public class MagazineItem extends Item implements IAmmoBox {
 
         int capacity = MagazineFamilySystem.getCapacityForFamily(familyId);
         tag.putInt(MAX_CAPACITY_TAG, capacity);
-        tag.putInt(AMMO_COUNT_TAG, Math.min(ammoCount, capacity));
-
         return stack;
     }
 
     public static ItemStack createMagazineByFamily(Item magazineItem, String familyId, int ammoCount, ResourceLocation ammoId) {
         ItemStack stack = createMagazineByFamily(magazineItem, familyId, ammoCount);
-        CompoundTag tag = stack.getOrCreateTag();
-        tag.putString(AMMO_ID_TAG, ammoId.toString());
+        int capacity = MagazineFamilySystem.getCapacityForFamily(familyId);
+        int count = Math.min(ammoCount, capacity);
+        if (count > 0 && ammoId != null && !DefaultAssets.EMPTY_AMMO_ID.equals(ammoId)) {
+            AmmoStack ammoStack = new AmmoStack();
+            ammoStack.push(ammoId, count);
+            ammoStack.saveToItemStack(stack);
+        }
         return stack;
     }
 

@@ -138,6 +138,9 @@
 
 
   "tacz.ammo.9mm.name": "§a9mm 手枪弹",
+  "tacz.ammo.9mm_hp.name": "§69mm RIP 肉伤弹 (HP)",
+  "tacz.ammo.9mm_ap.name": "§b9mm 7N31 穿甲弹 (AP)",
+  "tacz.ammo.9mm_tracer.name": "§a9mm 绿色曳光弹",
   "tacz.ammo.12g.name": "§912 号口径霰弹",
   "tacz.ammo.30_06.name": "§c.30-06 春田 步枪弹",
   "tacz.ammo.45acp.name": "§a.45 ACP 手枪弹",

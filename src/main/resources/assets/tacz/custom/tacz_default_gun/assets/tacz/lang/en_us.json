@@ -137,6 +137,9 @@
   "tacz.gun.m9a4.desc": "Pizza color won't help tactics, but at least you'll look good before you shoot",
   
   "tacz.ammo.9mm.name": "§a9mm Bullet",
+  "tacz.ammo.9mm_hp.name": "§69mm RIP (HP) Bullet",
+  "tacz.ammo.9mm_ap.name": "§b9mm 7N31 (AP) Bullet",
+  "tacz.ammo.9mm_tracer.name": "§a9mm Green Tracer Bullet",
   "tacz.ammo.12g.name": "§912 Gauge Bullet",
   "tacz.ammo.30_06.name": "§c.30-06 Springfield Bullet",
   "tacz.ammo.45acp.name": "§a.45 ACP Bullet",

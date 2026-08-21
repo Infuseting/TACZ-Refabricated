@@ -36,9 +36,18 @@ public class ExtraDamage {
         @SerializedName("damage")
         private float damage;
 
+        @SerializedName("multiplier")
+        @Nullable
+        private Float multiplier;
+
         public DistanceDamagePair(float distance, float damage) {
+            this(distance, damage, null);
+        }
+
+        public DistanceDamagePair(float distance, float damage, @Nullable Float multiplier) {
             this.distance = distance;
             this.damage = damage;
+            this.multiplier = multiplier;
         }
 
         public float getDistance() {
@@ -47,6 +56,11 @@ public class ExtraDamage {
 
         public float getDamage() {
             return damage;
+        }
+
+        @Nullable
+        public Float getMultiplier() {
+            return multiplier;
         }
     }
 }

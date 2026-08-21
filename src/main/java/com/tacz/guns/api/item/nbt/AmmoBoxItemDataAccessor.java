@@ -64,7 +64,9 @@ public interface AmmoBoxItemDataAccessor extends IAmmoBox {
                 return false;
             }
             ResourceLocation gunId = iGun.getGunId(gun);
-            return TimelessAPI.getCommonGunIndex(gunId).map(gunIndex -> gunIndex.getGunData().getAmmoId().equals(ammoId)).orElse(false);
+            return TimelessAPI.getCommonGunIndex(gunId)
+                    .map(gunIndex -> fr.infuseting.tacz.ammo.AmmoStack.isAmmoCompatible(gunIndex.getGunData().getAmmoId(), ammoId))
+                    .orElse(false);
         }
         return false;
     }
